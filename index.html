@@ -863,7 +863,7 @@
     chatStream.appendChild(row);
 
     let i = 0;
-    const speed = 18; // سرعة الكتابة بالمللي ثانية
+    const speed = 12; // سرعة الكتابة بالمللي ثانية
     const timer = setInterval(() => {
       bubble.textContent += fullText[i];
       i++;
@@ -875,10 +875,30 @@
     }, speed);
   }
 
-  async function handleUserMessage(text) {
+  // إجابات فورية محفوظة للأزرار الأربعة السريعة (بدون انتظار n8n!)
+  const INSTANT_ANSWERS = {
+    'مين إنت يا نانو وشو فكرتك؟':
+      'أهلاً بك! أنا نانو (Nano) 🛸✨ — مشروع طموح لذكاء اصطناعي محلي طائر من فريق Agentic Mind!\nالنسخة المعروضة اليوم هي نموذج أولي تفاعلي (Prototype) يورّيكم كيف رح يكون عندك مساعد ذكي خاص فيك: محلي 100%، يحمي خصوصيتك، وبيرافقك ويساعدك بكثير أمور!',
+    'شو يعني ذكاء اصطناعي محلي وحفظ الخصوصية؟':
+      'ميزة نانو الأقوى هي إنه ذكاء اصطناعي محلي (Local AI) 🔒:\nيعني يعمل على جهازك بدون إرسال بياناتك أو أسرارك لخوادم الشركات الخارجية! هذه نقطة قوة ضخمة لطلاب الـ IT في أمن المعلومات، وللشركات والجهات الحساسة اللي بتدور على خصوصية 100%.',
+    'كيف بتتعلّم مني وبربّيك على إيدي؟':
+      'فكرة نانو إنك بتربّيه على إيديك 🧠✨:\nكل ما تحكي معه وتشتغل معه، بيتعلّم أسلوبك، اهتماماتك، وطريقة شغلك بشكل خاص فيك لوحدك — زي مساعد شخصي مخصّص إلك، بس بدون ما يشارك أي معلومة برا جهازك!',
+    'شو الرؤية المستقبلية لمشروع نانو للشركات والدول؟':
+      'الرؤية المستقبلية لـ نانو (تجمع الـ IT والأعمال) 🚀:\n• تقنياً (IT): تطوير درون ذكي حقيقي مدمج بداخله شريحة ذكاء اصطناعي محلي (Edge AI) تعمل أوفلاين بالكامل.\n• تجارياً (Business): بناء شركة ناشئة توفّر مساعدين ذكيين آمنين ومحلّيين للأفراد، الشركات، وحتى المؤسسات والدول التي تمنع خروج بياناتها للسحابة!'
+  };
+
+  async function handleUserMessage(text, useInstant = false) {
     if (!text.trim()) return;
     addUserBubble(text);
     chatInput.value = '';
+
+    // إذا ضغط المستخدم على أحد الأزرار الأربعة -> رد فوري محفوظ خلال جزء من الثانية!
+    if (useInstant && INSTANT_ANSWERS[text]) {
+      setMascotState('thinking', '⚡ لحظة...');
+      setTimeout(() => streamBotReply(INSTANT_ANSWERS[text]), 220);
+      return;
+    }
+
     setMascotState('thinking', '⚡ يفكّر ويتواصل مع فريق الـ AI...');
 
     if (n8nUrl) {
@@ -930,7 +950,7 @@
   });
 
   document.querySelectorAll('.chip').forEach(btn => {
-    btn.addEventListener('click', () => handleUserMessage(btn.dataset.q));
+    btn.addEventListener('click', () => handleUserMessage(btn.dataset.q, true));
   });
 
   // نوافذ الفريق والإعدادات
