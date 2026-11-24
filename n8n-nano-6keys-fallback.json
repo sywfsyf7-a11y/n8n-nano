@@ -1,0 +1,133 @@
+{
+  "name": "Nano - Agentic Mind (AI Agent + 6-Key Fallback)",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "mode": "webhook",
+        "options": {
+          "title": "نانو — مساعد Agentic Mind",
+          "subtitle": "ذكاء اصطناعي محلي طائر (AI Agent + Memory + 6-Key Fallback)",
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "nano-chat-trigger-pro",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -380,
+        120
+      ],
+      "webhookId": "nano-agentic-mind-pro"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "أنت 'نانو' (Nano)، الذكاء الاصطناعي المحلي الطائر من فريق Agentic Mind لطلاب الجامعات في الأردن (تخصصي تكنولوجيا المعلومات والأعمال).\nفكرتك: ذكاء اصطناعي محلي يحفظ خصوصية المستخدم بدون إرسال بياناته للشركات، يتعلم من صاحبه ويُربّى على إيديه، ويساعد الإنسان دون أن يستبدله.\nأجب بلطف واختصار ووضوح بالعربية (أو الإنجليزية إذا خاطبك المستخدم بها)."
+        }
+      },
+      "id": "nano-ai-agent-pro",
+      "name": "Nano AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        -60,
+        120
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.6-flash",
+        "options": {
+          "temperature": 0.6
+        }
+      },
+      "id": "nano-gemini-primary",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 10
+      },
+      "id": "nano-simple-memory",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        60,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ============================================================\n// 🔑 مفاتيح الـ API الاحتياطية (تشتغل تلقائياً إذا المفتاح الأساسي في AI Agent وصل الحد!)\n// ============================================================\nconst API_KEYS = [\n  \"PUT_BACKUP_API_KEY_1_HERE\",\n  \"PUT_BACKUP_API_KEY_2_HERE\",\n  \"PUT_BACKUP_API_KEY_3_HERE\",\n  \"PUT_BACKUP_API_KEY_4_HERE\",\n  \"PUT_BACKUP_API_KEY_5_HERE\",\n  \"PUT_BACKUP_API_KEY_6_HERE\"\n];\n\nconst MODELS = [\n  \"gemini-3.6-flash\",\n  \"gemini-3.1-flash-lite\",\n  \"gemini-2.5-flash\",\n  \"gemini-2.5-flash-lite\"\n];\n\nconst SYSTEM_PROMPT = `أنت 'نانو' (Nano)، الذكاء الاصطناعي المحلي الطائر من فريق Agentic Mind لطلاب الجامعات في الأردن (تخصصي تكنولوجيا المعلومات والأعمال).\nفكرتك: ذكاء اصطناعي محلي يحفظ خصوصية المستخدم بدون إرسال بياناته للشركات، يتعلم من صاحبه ويُربّى على إيديه، ويساعد الإنسان دون أن يستبدله.\nأجب بلطف واختصار ووضوح بالعربية (أو الإنجليزية إذا خاطبك المستخدم بها).`;\n\n// قراءة رسالة المستخدم الأصلية مباشرة من Chat Trigger\nlet userMessage = \"مرحبا\";\ntry {\n  userMessage = $('When chat message received').first().json.chatInput || userMessage;\n} catch (e) {\n  userMessage = $input.first().json.chatInput || userMessage;\n}\n\nconst validKeys = API_KEYS.filter(k => k && !k.startsWith(\"PUT_BACKUP_API_KEY_\"));\n\nlet replyText = null;\nlet usedKeyIndex = -1;\nlet usedModel = null;\n\nfor (let i = 0; i < validKeys.length && !replyText; i++) {\n  const apiKey = validKeys[i];\n  for (let m = 0; m < MODELS.length && !replyText; m++) {\n    const model = MODELS[m];\n    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;\n    try {\n      const res = await this.helpers.httpRequest({\n        method: 'POST',\n        url,\n        headers: { 'Content-Type': 'application/json' },\n        body: {\n          systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },\n          contents: [{ role: 'user', parts: [{ text: userMessage }] }],\n          generationConfig: { temperature: 0.6, maxOutputTokens: 450 }\n        },\n        json: true,\n        timeout: 15000\n      });\n\n      const candidate = res?.candidates?.[0]?.content?.parts?.[0]?.text;\n      if (candidate) {\n        replyText = candidate.trim();\n        usedKeyIndex = i + 1;\n        usedModel = model;\n      }\n    } catch (err) {\n      continue;\n    }\n  }\n}\n\nif (!replyText) {\n  replyText = \"أهلاً بك! 👋 أنا نانو، الذكاء الاصطناعي المحلي الطائر من فريق Agentic Mind 🛸✨\\nبياناتك بتضل عندك بخصوصية 100%، وأنا هنا لأساعد طلاب الـ IT والأعمال في أفكار الأتمتة والمشاريع الذكية!\";\n}\n\nreturn [{ json: { output: replyText, usedKeyIndex, usedModel } }];\n"
+      },
+      "id": "nano-6key-fallback-node",
+      "name": "Nano 6-Key Auto Fallback Engine",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        300,
+        240
+      ]
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Nano AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Nano AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Nano AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Nano AI Agent": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Nano 6-Key Auto Fallback Engine",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

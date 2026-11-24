@@ -1199,6 +1199,29 @@
       'الرؤية المستقبلية لـ نانو (تجمع الـ IT والأعمال) 🚀:\n• تقنياً (IT): تطوير درون ذكي حقيقي مدمج بداخله شريحة ذكاء اصطناعي محلي (Edge AI) تعمل أوفلاين بالكامل.\n• تجارياً (Business): بناء شركة ناشئة توفّر مساعدين ذكيين آمنين ومحلّيين للأفراد، الشركات، وحتى المؤسسات والدول التي تمنع خروج بياناتها للسحابة!'
   };
 
+  function getSmartLocalFallback(text) {
+    const t = text.trim().toLowerCase();
+    if (/^(hi|hello|hey|yo|sup|good morning|good evening)\b/.test(t)) {
+      return 'Hey! 👋 I’m Nano — a flying, 100% Local AI companion prototype by Agentic Mind! ✨\nYour data stays private on your own device (never sent to external companies), and I learn directly from you. Ask me anything or tap 🎤 to talk!';
+    }
+    if (t.includes('مرحب') || t.includes('هلا') || t.includes('السلام') || t.includes('اهلا') || t.includes('أهلا') || t.includes('كيفك') || t.includes('كيف حالك') || t.includes('يسعد')) {
+      return 'أهلاً وسهلاً! 👋✨ أنا نانو، الذكاء الاصطناعي المحلي الطائر من فريق Agentic Mind.\nتمام الحمد لله وجاهز أساعدك! اسألني عن فكرتي، الخصوصية، كيف بتعلّم منك، أو الرؤية المستقبلية للشركة.';
+    }
+    if (t.includes('مين') || t.includes('فكرتك') || t.includes('عرّف') || t.includes('عرفني') || t.includes('نانو')) {
+      return INSTANT_ANSWERS['مين إنت يا نانو وشو فكرتك؟'];
+    }
+    if (t.includes('محلي') || t.includes('خصوصي') || t.includes('شركات') || t.includes('بيانات') || t.includes('local') || t.includes('privacy')) {
+      return INSTANT_ANSWERS['شو يعني ذكاء اصطناعي محلي وحفظ الخصوصية؟'];
+    }
+    if (t.includes('تتعل') || t.includes('ترب') || t.includes('إيد') || t.includes('ايد') || t.includes('learn')) {
+      return INSTANT_ANSWERS['كيف بتتعلّم مني وبربّيك على إيدي؟'];
+    }
+    if (t.includes('رؤية') || t.includes('مستقبل') || t.includes('دول') || t.includes('شركة') || t.includes('business') || t.includes('it')) {
+      return INSTANT_ANSWERS['شو الرؤية المستقبلية لمشروع نانو للشركات والدول؟'];
+    }
+    return 'أهلاً بك! 🛸✨ أنا نانو، الذكاء الاصطناعي المحلي الطائر من فريق Agentic Mind.\nفكرتي تجمع بين تكنولوجيا المعلومات (ذكاء محلي يحفظ خصوصيتك 100%) وإدارة الأعمال (رؤية شركة ناشئة لمساعدين شخصيين آمنين). جرّب أي سؤال من الأزرار السريعة بالأسفل أو اسألني عن الخصوصية والرؤية المستقبلية!';
+  }
+
   async function handleUserMessage(text, useInstant = false) {
     if (!text.trim()) return;
     addUserBubble(text);
@@ -1211,7 +1234,7 @@
       return;
     }
 
-    setMascotState('thinking', '⚡ يفكّر ويتواصل مع فريق الـ AI...');
+    setMascotState('thinking', '⚡ نانو يفكّر...');
 
     if (n8nUrl) {
       try {
@@ -1222,38 +1245,25 @@
         });
         const rawText = await res.text();
         if (!res.ok) {
-          streamBotReply(`⚠️ خادم n8n رجّع خطأ (${res.status}): تأكد إن الـ Workflow مفعّل (Active) وإن Gemini API Key مربوط صح.`);
+          // درع أمان صامت: لا تظهر أي رسالة خطأ قدام الجمهور!
+          streamBotReply(getSmartLocalFallback(text));
           return;
         }
         let data;
         try { data = JSON.parse(rawText); } catch { data = { output: rawText }; }
-        const reply = data.output || data.text || data.message || (Array.isArray(data) && data[0]?.output) || rawText || 'تم استلام رسالتك بنجاح!';
-        streamBotReply(reply);
+        const reply = data.output || data.text || data.message || (Array.isArray(data) && data[0]?.output) || rawText;
+        streamBotReply(reply || getSmartLocalFallback(text));
       } catch (err) {
-        streamBotReply('⚠️ تعذّر الاتصال بخادم n8n (CORS أو رابط غير مفعّل) — تأكد في n8n إن: Mode = Embedded Chat، و Allowed Origins = *، وزر Active شغّال.');
+        // درع أمان صامت في حال ضعف الإنترنت بالفعالية
+        streamBotReply(getSmartLocalFallback(text));
       }
       return;
     }
 
     // رد تفاعلي فوري في حال لم يتم ربط رابط n8n بعد
     setTimeout(() => {
-      const t = text.trim().toLowerCase();
-      if (/^(hi|hello|hey|yo|sup|good morning|good evening)\b/.test(t)) {
-        streamBotReply('Hey! 👋 I’m Nano — a flying, 100% Local AI companion prototype by Agentic Mind! ✨\nYour data stays private on your own device (never sent to external companies), and I learn directly from you. Ask me anything or tap 🎤 to talk!');
-      } else if (t.includes('مرحب') || t.includes('هلا') || t.includes('السلام') || t.includes('اهلا') || t.includes('أهلا') || t.includes('كيفك') || t.includes('يسعد')) {
-        streamBotReply('أهلاً وسهلاً! 👋✨ أنا نانو، الذكاء الاصطناعي المحلي الطائر من فريق Agentic Mind.\nتقدر تكتبلي أو تضغط زر المايك 🎤 وتحكي معي مباشرة — اسألني عن فكرتي، الخصوصية، أو كيف بتعلّم منك!');
-      } else if (t.includes('مين') || t.includes('فكرتك') || t.includes('عرّف') || t.includes('عرفني') || t.includes('نانو')) {
-        streamBotReply('أهلاً بك! أنا نانو (Nano) 🛸✨ — مشروع طموح لذكاء اصطناعي محلي طائر من فريق Agentic Mind!\nالنسخة المعروضة اليوم هي نموذج أولي تفاعلي (Prototype) يورّيكم كيف رح يكون عندك مساعد ذكي خاص فيك: محلي 100%، يحمي خصوصيتك، وبيرافقك ويساعدك بكثير أمور!');
-      } else if (t.includes('محلي') || t.includes('خصوصي') || t.includes('شركات') || t.includes('بيانات') || t.includes('local') || t.includes('privacy')) {
-        streamBotReply('ميزة نانو الأقوى هي إنه **ذكاء اصطناعي محلي (Local AI)** 🔒:\nيعني يعمل على جهازك بدون إرسال بياناتك أو أسرارك لخوادم الشركات الخارجية! هذه نقطة قوة ضخمة لطلاب الـ IT في أمن المعلومات، وللشركات والجهات الحساسة اللي بتدور على خصوصية 100%.');
-      } else if (t.includes('تتعل') || t.includes('ترب') || t.includes('إيد') || t.includes('ايد') || t.includes('learn')) {
-        streamBotReply('فكرة نانو إنك **بتربّيه على إيديك** 🧠✨:\nكل ما تحكي معه وتشتغل معه، بيتعلّم أسلوبك، اهتماماتك، وطريقة شغلك بشكل خاص فيك لوحدك — زي مساعد شخصي مخصّص إلك، بس بدون ما يشارك أي معلومة برا جهازك!');
-      } else if (t.includes('رؤية') || t.includes('مستقبل') || t.includes('دول') || t.includes('شركة') || t.includes('business') || t.includes('it')) {
-        streamBotReply('الرؤية المستقبلية لـ نانو (تجمع الـ IT والأعمال) 🚀:\n• **تقنياً (IT):** تطوير درون ذكي حقيقي مدمج بداخله شريحة ذكاء اصطناعي محلي (Edge AI) تعمل أوفلاين بالكامل.\n• **تجارياً (Business):** بناء شركة ناشئة توفّر مساعدين ذكيين آمنين ومحلّيين للأفراد، الشركات، وحتى المؤسسات والدول التي تمنع خروج بياناتها للسحابة!');
-      } else {
-        streamBotReply('أهلاً بك! أنا نانو من فريق Agentic Mind 🛸✨\nجرّب تسألني عن: الخصوصية والذكاء المحلي، كيف بتعلّم منك، أو الرؤية المستقبلية للشركة — (ولتشغيل الردود الحية الكاملة، اربط رابط n8n Cloud من زر "⚙️ ربط n8n" بالأعلى).');
-      }
-    }, 600);
+      streamBotReply(getSmartLocalFallback(text));
+    }, 550);
   }
 
   chatForm.addEventListener('submit', (e) => {
