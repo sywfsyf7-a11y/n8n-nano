@@ -115,139 +115,282 @@
       min-height: 0;
     }
 
-    /* Mascot Stage (Always alive at top of chat) */
+    /* Mascot Stage (High-Res 3D Nano + Interactive Animations) */
     .mascot-stage {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 10px 0 6px;
+      padding: 6px 0 8px;
       position: relative;
       transition: all 0.4s ease;
+    }
+
+    .mascot-arena {
+      position: relative;
+      width: 100%;
+      max-width: 520px;
+      height: 196px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: visible;
     }
 
     .mascot-wrap {
       position: relative;
       width: 190px;
-      height: 165px;
+      height: 185px;
       display: grid;
       place-items: center;
       cursor: pointer;
+      transition: transform 0.65s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
     .mascot-glow {
       position: absolute;
-      width: 135px;
-      height: 135px;
+      width: 155px;
+      height: 155px;
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(250, 204, 21, 0.34), rgba(45, 212, 191, 0.18), transparent 72%);
-      filter: blur(16px);
+      background: radial-gradient(circle, rgba(250, 204, 21, 0.32), rgba(45, 212, 191, 0.2), transparent 72%);
+      filter: blur(18px);
       animation: glowPulse 3.2s ease-in-out infinite;
+      transition: opacity 0.4s, transform 0.4s;
     }
 
-    .mascot-shadow {
+    /* Glowing Landing Pad (visible especially when Nano sits!) */
+    .landing-pad {
       position: absolute;
       bottom: 4px;
-      width: 78px;
-      height: 12px;
+      width: 112px;
+      height: 18px;
       border-radius: 50%;
-      background: rgba(45, 212, 191, 0.3);
-      filter: blur(5px);
-      animation: shadowFloat 3.2s ease-in-out infinite;
+      background: radial-gradient(ellipse, rgba(56, 189, 248, 0.55) 0%, rgba(56, 189, 248, 0.14) 60%, transparent 80%);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      box-shadow: 0 0 18px rgba(56, 189, 248, 0.35);
+      transition: all 0.5s ease;
     }
 
-    .bot-svg {
-      width: 185px;
-      height: 158px;
+    .nano-img {
+      width: 184px;
+      height: 184px;
+      object-fit: contain;
       position: relative;
       z-index: 2;
-      animation: hoverFly 3.2s ease-in-out infinite;
-      transition: transform 0.3s ease;
-      filter: drop-shadow(0 14px 24px rgba(0, 0, 0, 0.5));
+      border-radius: 50%;
+      -webkit-mask-image: radial-gradient(circle, #000 54%, transparent 74%);
+      mask-image: radial-gradient(circle, #000 54%, transparent 74%);
+      filter: drop-shadow(0 16px 26px rgba(0, 0, 0, 0.55));
+      transition: transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.35s ease;
+      user-select: none;
+      pointer-events: none;
     }
 
-    /* Flying & Rotor Animations (Nano Drone) */
-    @keyframes hoverFly {
-      0%, 100% { transform: translateY(0px) rotate(-2deg); }
-      50% { transform: translateY(-12px) rotate(2deg); }
+    /* Sound Wave Equalizer when Talking */
+    .voice-wave {
+      position: absolute;
+      bottom: 14px;
+      z-index: 4;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      height: 18px;
+      opacity: 0;
+      transform: scale(0.8);
+      transition: all 0.25s ease;
+      pointer-events: none;
     }
-    @keyframes shadowFloat {
-      0%, 100% { transform: scale(1); opacity: 0.45; }
-      50% { transform: scale(0.72); opacity: 0.22; }
+    .voice-wave span {
+      width: 4px;
+      height: 6px;
+      border-radius: 99px;
+      background: linear-gradient(to top, #38bdf8, #fde047);
+      animation: waveBar 0.45s ease-in-out infinite alternate;
     }
+    .voice-wave span:nth-child(2) { animation-delay: 0.1s; }
+    .voice-wave span:nth-child(3) { animation-delay: 0.2s; }
+    .voice-wave span:nth-child(4) { animation-delay: 0.3s; }
+    .voice-wave span:nth-child(5) { animation-delay: 0.15s; }
+    @keyframes waveBar {
+      from { height: 5px; }
+      to { height: 18px; }
+    }
+
+    /* Sparkle Particle Burst */
+    .sparkle {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 6;
+      animation: burstOut 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes burstOut {
+      0% { transform: translate(0, 0) scale(1); opacity: 1; }
+      100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+    }
+
+    /* ====== Nano Animation Modes ====== */
+    /* 1. Default Fly / Hover */
+    .mascot-wrap.state-idle .nano-img,
+    .mascot-wrap.anim-fly .nano-img {
+      animation: nanoFly 3.2s ease-in-out infinite;
+    }
+    @keyframes nanoFly {
+      0%, 100% { transform: translateY(-6px) rotate(-2deg); }
+      50% { transform: translateY(-20px) rotate(2.5deg); }
+    }
+
+    /* 2. Sit / Rest on the Landing Pad */
+    .mascot-wrap.anim-sit .nano-img {
+      animation: nanoSitBreath 3.5s ease-in-out infinite;
+      filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.65)) brightness(0.92);
+    }
+    .mascot-wrap.anim-sit .mascot-glow { opacity: 0.3; transform: scale(0.8); }
+    .mascot-wrap.anim-sit .landing-pad {
+      width: 128px;
+      box-shadow: 0 0 26px rgba(250, 204, 21, 0.45);
+      border-color: rgba(250, 204, 21, 0.55);
+    }
+    @keyframes nanoSitBreath {
+      0%, 100% { transform: translateY(20px) scaleY(0.95) scaleX(1.03) rotate(0deg); }
+      50% { transform: translateY(18px) scaleY(0.98) scaleX(1.01) rotate(-1deg); }
+    }
+
+    /* 3. Dance */
+    .mascot-wrap.anim-dance .nano-img {
+      animation: nanoDance 0.75s ease-in-out infinite;
+    }
+    @keyframes nanoDance {
+      0%, 100% { transform: translateY(-8px) rotate(-10deg) scale(1.02); }
+      25% { transform: translateY(-24px) rotate(0deg) scale(1.06, 0.95); }
+      50% { transform: translateY(-8px) rotate(10deg) scale(1.02); }
+      75% { transform: translateY(-22px) rotate(0deg) scale(0.96, 1.06); }
+    }
+
+    /* 4. Spin 360 */
+    .mascot-wrap.anim-spin .nano-img {
+      animation: nanoSpin 1.05s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    }
+    @keyframes nanoSpin {
+      0% { transform: translateY(-14px) rotate(0deg) scale(1); }
+      50% { transform: translateY(-26px) rotate(180deg) scale(1.08); }
+      100% { transform: translateY(-14px) rotate(360deg) scale(1); }
+    }
+
+    /* 5. Patrol / Move Left & Right */
+    .mascot-wrap.anim-patrol {
+      animation: nanoPatrolMove 3.6s ease-in-out infinite;
+    }
+    .mascot-wrap.anim-patrol .nano-img {
+      animation: nanoPatrolTilt 3.6s ease-in-out infinite;
+    }
+    @keyframes nanoPatrolMove {
+      0%, 100% { transform: translateX(0px); }
+      25% { transform: translateX(115px); }
+      75% { transform: translateX(-115px); }
+    }
+    @keyframes nanoPatrolTilt {
+      0%, 100% { transform: translateY(-14px) rotate(0deg); }
+      20% { transform: translateY(-22px) rotate(14deg); }
+      50% { transform: translateY(-10px) rotate(0deg); }
+      70% { transform: translateY(-22px) rotate(-14deg); }
+    }
+
+    /* 6. Celebrate Jump */
+    .mascot-wrap.anim-celebrate .nano-img {
+      animation: nanoCelebrate 0.65s ease-in-out infinite;
+      filter: drop-shadow(0 0 22px rgba(250, 204, 21, 0.65));
+    }
+    @keyframes nanoCelebrate {
+      0%, 100% { transform: translateY(0px) scale(1.05, 0.94); }
+      45% { transform: translateY(-34px) scale(0.96, 1.08) rotate(8deg); }
+      70% { transform: translateY(-28px) rotate(-8deg); }
+    }
+
+    /* 7. Wave / Greet */
+    .mascot-wrap.anim-wave .nano-img {
+      animation: nanoWave 0.55s ease-in-out infinite;
+    }
+    @keyframes nanoWave {
+      0%, 100% { transform: translateY(-14px) scale(1.12) rotate(-8deg); }
+      50% { transform: translateY(-18px) scale(1.16) rotate(8deg); }
+    }
+
+    /* Conversation States (override while listening/thinking/talking) */
+    .mascot-wrap.state-listening .nano-img {
+      animation: nanoFly 1.9s ease-in-out infinite;
+      filter: drop-shadow(0 0 20px rgba(56, 189, 248, 0.65));
+    }
+    .mascot-wrap.state-thinking .nano-img {
+      animation: nanoThink 0.8s ease-in-out infinite;
+      filter: drop-shadow(0 0 24px rgba(192, 132, 252, 0.7));
+    }
+    @keyframes nanoThink {
+      0%, 100% { transform: translateY(-10px) rotate(-6deg) scale(1.02); }
+      50% { transform: translateY(-22px) rotate(6deg) scale(1.06); }
+    }
+    .mascot-wrap.state-talking .nano-img {
+      animation: nanoTalk 0.42s ease-in-out infinite;
+      filter: drop-shadow(0 0 24px rgba(56, 189, 248, 0.75));
+    }
+    .mascot-wrap.state-talking .voice-wave {
+      opacity: 1;
+      transform: scale(1);
+    }
+    @keyframes nanoTalk {
+      0%, 100% { transform: translateY(-10px) scale(1); }
+      50% { transform: translateY(-18px) scale(1.06, 0.97); }
+    }
+
     @keyframes glowPulse {
       0%, 100% { transform: scale(0.95); opacity: 0.65; }
       50% { transform: scale(1.15); opacity: 1; }
     }
 
-    .rotor-blade {
-      transform-box: fill-box;
-      transform-origin: center;
-      animation: spinBlade 0.28s linear infinite;
-    }
-    @keyframes spinBlade {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-
-    /* Eyes blink */
-    .eye {
-      transform-origin: center;
-      transform-box: fill-box;
-      animation: blinkEye 4.2s infinite;
-      transition: transform 0.25s ease;
-    }
-    @keyframes blinkEye {
-      0%, 92%, 100% { transform: scaleY(1); }
-      95% { transform: scaleY(0.1); }
+    /* Animation Control Bar */
+    .anim-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(14, 25, 45, 0.75);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(10px);
     }
 
-    /* Mascot States */
-    .mascot-wrap.state-listening .bot-svg {
-      animation: hoverFly 2.1s ease-in-out infinite;
-      transform: scale(1.05);
+    .anim-btn {
+      font-family: inherit;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid transparent;
+      color: #cbd5e1;
+      padding: 5px 11px;
+      border-radius: 999px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
     }
-    .mascot-wrap.state-listening .eye {
-      transform: translateY(2.5px) scale(1.1);
+    .anim-btn:hover {
+      background: rgba(56, 189, 248, 0.16);
+      color: #fff;
+      transform: translateY(-1px);
     }
-
-    .mascot-wrap.state-thinking .bot-svg {
-      animation: thinkBob 0.8s ease-in-out infinite;
-    }
-    .mascot-wrap.state-thinking .rotor-blade { animation-duration: 0.12s; }
-    .mascot-wrap.state-thinking .mascot-glow {
-      background: radial-gradient(circle, rgba(56, 189, 248, 0.52), rgba(250, 204, 21, 0.25), transparent 72%);
-    }
-    @keyframes thinkBob {
-      0%, 100% { transform: translateY(-4px) rotate(-4deg); }
-      50% { transform: translateY(-14px) rotate(4deg); }
-    }
-
-    .mascot-wrap.state-talking .bot-svg {
-      animation: talkBounce 0.44s ease-in-out infinite;
-    }
-    .mascot-wrap.state-talking .rotor-blade { animation-duration: 0.16s; }
-    @keyframes talkBounce {
-      0%, 100% { transform: translateY(-2px) scale(1); }
-      50% { transform: translateY(-8px) scale(1.03); }
-    }
-
-    .mouth-idle { opacity: 1; transition: opacity 0.15s; }
-    .mouth-talk { opacity: 0; transform-box: fill-box; transform-origin: center; }
-    .mascot-wrap.state-talking .mouth-idle { opacity: 0; }
-    .mascot-wrap.state-talking .mouth-talk {
-      opacity: 1;
-      animation: mouthSpeak 0.2s ease-in-out infinite alternate;
-    }
-    @keyframes mouthSpeak {
-      0% { transform: scaleY(0.35) scaleX(0.92); }
-      50% { transform: scaleY(1.15) scaleX(1.05); }
-      100% { transform: scaleY(0.65) scaleX(0.96); }
+    .anim-btn.active {
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.3), rgba(129, 140, 248, 0.35));
+      border-color: rgba(56, 189, 248, 0.6);
+      color: #fff;
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
     }
 
     .mascot-status-pill {
-      margin-top: 2px;
-      font-size: 0.78rem;
+      margin-top: 6px;
+      font-size: 0.76rem;
       font-weight: 700;
       color: var(--cyan);
       background: rgba(56, 189, 248, 0.1);
@@ -532,118 +675,31 @@
 <!-- مساحة الشات الرئيسية بأسلوب Gemini + الروبوت الطائر -->
 <main class="app-container">
 
-  <!-- الروبوت الذكي الطائر والمتكلم -->
+  <!-- نانو 3D عالي الدقة + أزرار الأنيميشن -->
   <div class="mascot-stage">
-    <div class="mascot-wrap state-idle" id="mascot" title="اضغط عليّ للترحيب!">
-      <div class="mascot-glow"></div>
-      <div class="mascot-shadow"></div>
-
-      <!-- شخصية نانو (Nano) الطائرة — درون أصفر بـ 4 مراوح وشاشة وجه تركوازية -->
-      <svg class="bot-svg" viewBox="0 0 260 210" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <radialGradient id="nanoGold" cx="42%" cy="28%" r="68%">
-            <stop offset="0%" stop-color="#fde047" />
-            <stop offset="55%" stop-color="#eab308" />
-            <stop offset="100%" stop-color="#a16207" />
-          </radialGradient>
-          <radialGradient id="nanoScreen" cx="50%" cy="45%" r="60%">
-            <stop offset="0%" stop-color="#ccfbf1" />
-            <stop offset="55%" stop-color="#5eead4" />
-            <stop offset="100%" stop-color="#0d9488" />
-          </radialGradient>
-          <linearGradient id="ringMetal" x1="0" y1="0" x2="1" y2="1">
-            <stop stop-color="#334155" />
-            <stop offset="1" stop-color="#0f172a" />
-          </linearGradient>
-        </defs>
-
-        <!-- أذرع المراوح الجانبية والسفلية -->
-        <line x1="88" y1="98" x2="48" y2="96" stroke="#a16207" stroke-width="4" stroke-linecap="round"/>
-        <line x1="172" y1="98" x2="212" y2="86" stroke="#a16207" stroke-width="4" stroke-linecap="round"/>
-        <line x1="108" y1="112" x2="96" y2="148" stroke="#a16207" stroke-width="3.5" stroke-linecap="round"/>
-        <line x1="152" y1="112" x2="168" y2="144" stroke="#a16207" stroke-width="3.5" stroke-linecap="round"/>
-
-        <!-- المروحة اليسرى العلوية -->
-        <g transform="translate(42, 95) rotate(-14)">
-          <ellipse cx="0" cy="0" rx="34" ry="22" fill="rgba(45,212,191,0.12)" stroke="url(#ringMetal)" stroke-width="5.5"/>
-          <ellipse cx="0" cy="0" rx="34" ry="22" fill="none" stroke="#eab308" stroke-width="1.3" stroke-dasharray="14 10"/>
-          <g class="rotor-blade">
-            <ellipse cx="0" cy="0" rx="26" ry="4" fill="#facc15" opacity="0.8"/>
-            <ellipse cx="0" cy="0" rx="4" ry="16" fill="#facc15" opacity="0.8"/>
-          </g>
-          <circle cx="0" cy="0" r="4" fill="#1e293b"/>
-        </g>
-
-        <!-- المروحة اليمنى العلوية -->
-        <g transform="translate(218, 82) rotate(-18)">
-          <ellipse cx="0" cy="0" rx="34" ry="22" fill="rgba(45,212,191,0.12)" stroke="url(#ringMetal)" stroke-width="5.5"/>
-          <ellipse cx="0" cy="0" rx="34" ry="22" fill="none" stroke="#eab308" stroke-width="1.3" stroke-dasharray="14 10"/>
-          <g class="rotor-blade">
-            <ellipse cx="0" cy="0" rx="26" ry="4" fill="#facc15" opacity="0.8"/>
-            <ellipse cx="0" cy="0" rx="4" ry="16" fill="#facc15" opacity="0.8"/>
-          </g>
-          <circle cx="0" cy="0" r="4" fill="#1e293b"/>
-        </g>
-
-        <!-- المروحة السفلية اليسرى -->
-        <g transform="translate(94, 158) rotate(16)">
-          <ellipse cx="0" cy="0" rx="14" ry="30" fill="rgba(45,212,191,0.12)" stroke="url(#ringMetal)" stroke-width="5"/>
-          <g class="rotor-blade">
-            <ellipse cx="0" cy="0" rx="9" ry="22" fill="#facc15" opacity="0.65"/>
-          </g>
-          <circle cx="0" cy="0" r="3.5" fill="#1e293b"/>
-        </g>
-
-        <!-- المروحة السفلية اليمنى -->
-        <g transform="translate(172, 152) rotate(-26)">
-          <ellipse cx="0" cy="0" rx="14" ry="30" fill="rgba(45,212,191,0.12)" stroke="url(#ringMetal)" stroke-width="5"/>
-          <g class="rotor-blade">
-            <ellipse cx="0" cy="0" rx="9" ry="22" fill="#facc15" opacity="0.65"/>
-          </g>
-          <circle cx="0" cy="0" r="3.5" fill="#1e293b"/>
-        </g>
-
-        <!-- تاج/قبعة نانو العلوية -->
-        <path d="M114 38 L146 38 L140 48 L120 48 Z" fill="#eab308" stroke="#a16207" stroke-width="1.5"/>
-
-        <!-- جسم نانو الأصفر على شكل قبة -->
-        <path d="M80 105 C80 56, 102 44, 130 44 C158 44, 180 56, 180 105 C180 116, 170 120, 130 120 C90 120, 80 116, 80 105 Z"
-              fill="url(#nanoGold)" stroke="#ca8a04" stroke-width="2.2"/>
-
-        <!-- لمعة على القبة الصفراء -->
-        <path d="M98 62 C106 52, 120 49, 132 50" stroke="#fef9c3" stroke-width="3.5" stroke-linecap="round" opacity="0.7"/>
-
-        <!-- الجوهرة/الزر التركوازي في الجبهة -->
-        <circle cx="130" cy="57" r="5" fill="#14b8a6" stroke="#fef08a" stroke-width="1.5">
-          <animate attributeName="opacity" values="0.75;1;0.75" dur="2s" repeatCount="indefinite" />
-        </circle>
-
-        <!-- شاشة وجه نانو التركوازية -->
-        <rect x="96" y="68" width="68" height="42" rx="12" fill="url(#nanoScreen)" stroke="#0f766e" stroke-width="2.2"/>
-
-        <!-- حواجب لطيفة -->
-        <path d="M112 77 Q117 74 122 76" stroke="#0f172a" stroke-width="2" stroke-linecap="round" fill="none"/>
-        <path d="M138 76 Q143 74 148 77" stroke="#0f172a" stroke-width="2" stroke-linecap="round" fill="none"/>
-
-        <!-- العيون -->
-        <g class="eye">
-          <ellipse cx="117" cy="84" rx="4.2" ry="5.5" fill="#0f172a"/>
-          <circle cx="118.5" cy="82.3" r="1.5" fill="#ffffff"/>
-        </g>
-        <g class="eye">
-          <ellipse cx="143" cy="84" rx="4.2" ry="5.5" fill="#0f172a"/>
-          <circle cx="144.5" cy="82.3" r="1.5" fill="#ffffff"/>
-        </g>
-
-        <!-- ابتسامة نانو الكبيرة (Idle) -->
-        <path class="mouth-idle" d="M115 94 Q130 108 145 94 Q130 98 115 94 Z" fill="#ffffff" stroke="#0f172a" stroke-width="2" stroke-linejoin="round"/>
-
-        <!-- فم نانو المتحرك أثناء الكلام (Talking) -->
-        <path class="mouth-talk" d="M117 93 Q130 110 143 93 Q130 96 117 93 Z" fill="#0f172a" stroke="#0f172a" stroke-width="1.5"/>
-      </svg>
+    <div class="mascot-arena" id="mascotArena">
+      <div class="mascot-wrap state-idle anim-fly" id="mascot" title="اضغط عليّ للترحيب!">
+        <div class="mascot-glow"></div>
+        <div class="landing-pad"></div>
+        <img src="nano.jpg" alt="نانو — المساعد الذكي الطائر" class="nano-img" />
+        <div class="voice-wave" aria-hidden="true">
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+      </div>
     </div>
 
-    <div class="mascot-status-pill" id="mascotStatus">✨ جاهز للاستماع إليك</div>
+    <!-- أزرار تحريك نانو (يطير، يقعد، يرقص، يلف، يتحرك، يحتفل، يحيّي) -->
+    <div class="anim-controls" role="toolbar" aria-label="حركات نانو">
+      <button type="button" class="anim-btn active" data-anim="fly">🛸 طيران</button>
+      <button type="button" class="anim-btn" data-anim="sit">🪑 اقعد</button>
+      <button type="button" class="anim-btn" data-anim="patrol">⚡ تحرّك</button>
+      <button type="button" class="anim-btn" data-anim="dance">💃 رقص</button>
+      <button type="button" class="anim-btn" data-anim="spin">🌀 لفّة 360°</button>
+      <button type="button" class="anim-btn" data-anim="celebrate">🎉 احتفال</button>
+      <button type="button" class="anim-btn" data-anim="wave">👋 تحيّة</button>
+    </div>
+
+    <div class="mascot-status-pill" id="mascotStatus">✨ نانو يطير وجاهز للاستماع إليك</div>
   </div>
 
   <!-- ترحيب Gemini -->
@@ -740,8 +796,60 @@
   const chatForm = document.getElementById('chatForm');
   const chatInput = document.getElementById('chatInput');
 
+  const ANIM_CLASSES = ['anim-fly', 'anim-sit', 'anim-patrol', 'anim-dance', 'anim-spin', 'anim-celebrate', 'anim-wave'];
+  const ANIM_LABELS = {
+    fly: '🛸 نانو يطير وجاهز للاستماع إليك',
+    sit: '🪑 نانو قاعد ومستريح على القاعدة',
+    patrol: '⚡ نانو يتحرك ويفحص المكان!',
+    dance: '💃 نانو يرقص بحماس!',
+    spin: '🌀 نانو يعمل لفّة 360 درجة!',
+    celebrate: '🎉 نانو يحتفل معكم في الفعالية!',
+    wave: '👋 نانو يحيّي جمهور Agentic Mind!'
+  };
+
+  function spawnSparkles() {
+    const colors = ['#fde047', '#38bdf8', '#c084fc', '#4ade80', '#ffffff'];
+    for (let i = 0; i < 16; i++) {
+      const sp = document.createElement('span');
+      sp.className = 'sparkle';
+      const angle = (Math.PI * 2 * i) / 16 + Math.random() * 0.25;
+      const dist = 65 + Math.random() * 55;
+      sp.style.background = colors[i % colors.length];
+      sp.style.setProperty('--tx', `${Math.cos(angle) * dist}px`);
+      sp.style.setProperty('--ty', `${Math.sin(angle) * dist}px`);
+      mascot.appendChild(sp);
+      setTimeout(() => sp.remove(), 950);
+    }
+  }
+
+  function setNanoAnim(mode) {
+    mascot.classList.remove(...ANIM_CLASSES);
+    mascot.classList.add('anim-' + mode);
+    document.querySelectorAll('.anim-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.anim === mode);
+    });
+    mascotStatus.textContent = ANIM_LABELS[mode] || '✨ نانو جاهز';
+    if (mode === 'celebrate' || mode === 'wave') spawnSparkles();
+  }
+
+  document.querySelectorAll('.anim-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const mode = btn.dataset.anim;
+      mascot.classList.remove('state-listening', 'state-thinking', 'state-talking');
+      mascot.classList.add('state-idle');
+      setNanoAnim(mode);
+      if (mode === 'wave') {
+        streamBotReply('أهلاً وسهلاً بكل طلاب الـ IT والأعمال! 👋🛸 أنا نانو، سعيد جداً بشوفتكم في الفعالية!');
+      }
+    });
+  });
+
   function setMascotState(state, label) {
     mascot.classList.remove('state-idle', 'state-listening', 'state-thinking', 'state-talking');
+    if (state !== 'idle') {
+      // إذا كان نانو قاعداً، يقلع تلقائياً عند التفاعل!
+      if (mascot.classList.contains('anim-sit')) setNanoAnim('fly');
+    }
     mascot.classList.add('state-' + state);
     mascotStatus.textContent = label;
   }
