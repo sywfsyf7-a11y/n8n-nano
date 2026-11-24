@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <style>
     :root {
       --bg: #070d1a;
@@ -115,238 +116,31 @@
       min-height: 0;
     }
 
-    /* Mascot Stage (High-Res 3D Nano + Interactive Animations) */
+    /* Mascot Stage (Real 3D Rigged Three.js Nano) */
     .mascot-stage {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 6px 0 8px;
+      padding: 4px 0 6px;
       position: relative;
-      transition: all 0.4s ease;
     }
 
     .mascot-arena {
       position: relative;
       width: 100%;
-      max-width: 520px;
-      height: 196px;
+      max-width: 640px;
+      height: 235px;
       display: flex;
       align-items: center;
       justify-content: center;
-      overflow: visible;
-    }
-
-    .mascot-wrap {
-      position: relative;
-      width: 190px;
-      height: 185px;
-      display: grid;
-      place-items: center;
       cursor: pointer;
-      transition: transform 0.65s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
-    .mascot-glow {
-      position: absolute;
-      width: 155px;
-      height: 155px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(250, 204, 21, 0.32), rgba(45, 212, 191, 0.2), transparent 72%);
-      filter: blur(18px);
-      animation: glowPulse 3.2s ease-in-out infinite;
-      transition: opacity 0.4s, transform 0.4s;
-    }
-
-    /* Glowing Landing Pad (visible especially when Nano sits!) */
-    .landing-pad {
-      position: absolute;
-      bottom: 4px;
-      width: 112px;
-      height: 18px;
-      border-radius: 50%;
-      background: radial-gradient(ellipse, rgba(56, 189, 248, 0.55) 0%, rgba(56, 189, 248, 0.14) 60%, transparent 80%);
-      border: 1px solid rgba(56, 189, 248, 0.35);
-      box-shadow: 0 0 18px rgba(56, 189, 248, 0.35);
-      transition: all 0.5s ease;
-    }
-
-    .nano-img {
-      width: 184px;
-      height: 184px;
-      object-fit: contain;
-      position: relative;
-      z-index: 2;
-      border-radius: 50%;
-      -webkit-mask-image: radial-gradient(circle, #000 54%, transparent 74%);
-      mask-image: radial-gradient(circle, #000 54%, transparent 74%);
-      filter: drop-shadow(0 16px 26px rgba(0, 0, 0, 0.55));
-      transition: transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.35s ease;
-      user-select: none;
-      pointer-events: none;
-    }
-
-    /* Sound Wave Equalizer when Talking */
-    .voice-wave {
-      position: absolute;
-      bottom: 14px;
-      z-index: 4;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      height: 18px;
-      opacity: 0;
-      transform: scale(0.8);
-      transition: all 0.25s ease;
-      pointer-events: none;
-    }
-    .voice-wave span {
-      width: 4px;
-      height: 6px;
-      border-radius: 99px;
-      background: linear-gradient(to top, #38bdf8, #fde047);
-      animation: waveBar 0.45s ease-in-out infinite alternate;
-    }
-    .voice-wave span:nth-child(2) { animation-delay: 0.1s; }
-    .voice-wave span:nth-child(3) { animation-delay: 0.2s; }
-    .voice-wave span:nth-child(4) { animation-delay: 0.3s; }
-    .voice-wave span:nth-child(5) { animation-delay: 0.15s; }
-    @keyframes waveBar {
-      from { height: 5px; }
-      to { height: 18px; }
-    }
-
-    /* Sparkle Particle Burst */
-    .sparkle {
-      position: absolute;
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      pointer-events: none;
-      z-index: 6;
-      animation: burstOut 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-    @keyframes burstOut {
-      0% { transform: translate(0, 0) scale(1); opacity: 1; }
-      100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
-    }
-
-    /* ====== Nano Animation Modes ====== */
-    /* 1. Default Fly / Hover */
-    .mascot-wrap.state-idle .nano-img,
-    .mascot-wrap.anim-fly .nano-img {
-      animation: nanoFly 3.2s ease-in-out infinite;
-    }
-    @keyframes nanoFly {
-      0%, 100% { transform: translateY(-6px) rotate(-2deg); }
-      50% { transform: translateY(-20px) rotate(2.5deg); }
-    }
-
-    /* 2. Sit / Rest on the Landing Pad */
-    .mascot-wrap.anim-sit .nano-img {
-      animation: nanoSitBreath 3.5s ease-in-out infinite;
-      filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.65)) brightness(0.92);
-    }
-    .mascot-wrap.anim-sit .mascot-glow { opacity: 0.3; transform: scale(0.8); }
-    .mascot-wrap.anim-sit .landing-pad {
-      width: 128px;
-      box-shadow: 0 0 26px rgba(250, 204, 21, 0.45);
-      border-color: rgba(250, 204, 21, 0.55);
-    }
-    @keyframes nanoSitBreath {
-      0%, 100% { transform: translateY(20px) scaleY(0.95) scaleX(1.03) rotate(0deg); }
-      50% { transform: translateY(18px) scaleY(0.98) scaleX(1.01) rotate(-1deg); }
-    }
-
-    /* 3. Dance */
-    .mascot-wrap.anim-dance .nano-img {
-      animation: nanoDance 0.75s ease-in-out infinite;
-    }
-    @keyframes nanoDance {
-      0%, 100% { transform: translateY(-8px) rotate(-10deg) scale(1.02); }
-      25% { transform: translateY(-24px) rotate(0deg) scale(1.06, 0.95); }
-      50% { transform: translateY(-8px) rotate(10deg) scale(1.02); }
-      75% { transform: translateY(-22px) rotate(0deg) scale(0.96, 1.06); }
-    }
-
-    /* 4. Spin 360 */
-    .mascot-wrap.anim-spin .nano-img {
-      animation: nanoSpin 1.05s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
-    }
-    @keyframes nanoSpin {
-      0% { transform: translateY(-14px) rotate(0deg) scale(1); }
-      50% { transform: translateY(-26px) rotate(180deg) scale(1.08); }
-      100% { transform: translateY(-14px) rotate(360deg) scale(1); }
-    }
-
-    /* 5. Patrol / Move Left & Right */
-    .mascot-wrap.anim-patrol {
-      animation: nanoPatrolMove 3.6s ease-in-out infinite;
-    }
-    .mascot-wrap.anim-patrol .nano-img {
-      animation: nanoPatrolTilt 3.6s ease-in-out infinite;
-    }
-    @keyframes nanoPatrolMove {
-      0%, 100% { transform: translateX(0px); }
-      25% { transform: translateX(115px); }
-      75% { transform: translateX(-115px); }
-    }
-    @keyframes nanoPatrolTilt {
-      0%, 100% { transform: translateY(-14px) rotate(0deg); }
-      20% { transform: translateY(-22px) rotate(14deg); }
-      50% { transform: translateY(-10px) rotate(0deg); }
-      70% { transform: translateY(-22px) rotate(-14deg); }
-    }
-
-    /* 6. Celebrate Jump */
-    .mascot-wrap.anim-celebrate .nano-img {
-      animation: nanoCelebrate 0.65s ease-in-out infinite;
-      filter: drop-shadow(0 0 22px rgba(250, 204, 21, 0.65));
-    }
-    @keyframes nanoCelebrate {
-      0%, 100% { transform: translateY(0px) scale(1.05, 0.94); }
-      45% { transform: translateY(-34px) scale(0.96, 1.08) rotate(8deg); }
-      70% { transform: translateY(-28px) rotate(-8deg); }
-    }
-
-    /* 7. Wave / Greet */
-    .mascot-wrap.anim-wave .nano-img {
-      animation: nanoWave 0.55s ease-in-out infinite;
-    }
-    @keyframes nanoWave {
-      0%, 100% { transform: translateY(-14px) scale(1.12) rotate(-8deg); }
-      50% { transform: translateY(-18px) scale(1.16) rotate(8deg); }
-    }
-
-    /* Conversation States (override while listening/thinking/talking) */
-    .mascot-wrap.state-listening .nano-img {
-      animation: nanoFly 1.9s ease-in-out infinite;
-      filter: drop-shadow(0 0 20px rgba(56, 189, 248, 0.65));
-    }
-    .mascot-wrap.state-thinking .nano-img {
-      animation: nanoThink 0.8s ease-in-out infinite;
-      filter: drop-shadow(0 0 24px rgba(192, 132, 252, 0.7));
-    }
-    @keyframes nanoThink {
-      0%, 100% { transform: translateY(-10px) rotate(-6deg) scale(1.02); }
-      50% { transform: translateY(-22px) rotate(6deg) scale(1.06); }
-    }
-    .mascot-wrap.state-talking .nano-img {
-      animation: nanoTalk 0.42s ease-in-out infinite;
-      filter: drop-shadow(0 0 24px rgba(56, 189, 248, 0.75));
-    }
-    .mascot-wrap.state-talking .voice-wave {
-      opacity: 1;
-      transform: scale(1);
-    }
-    @keyframes nanoTalk {
-      0%, 100% { transform: translateY(-10px) scale(1); }
-      50% { transform: translateY(-18px) scale(1.06, 0.97); }
-    }
-
-    @keyframes glowPulse {
-      0%, 100% { transform: scale(0.95); opacity: 0.65; }
-      50% { transform: scale(1.15); opacity: 1; }
+    #nano3d {
+      width: 100%;
+      height: 100%;
+      display: block;
     }
 
     /* Animation Control Bar */
@@ -356,10 +150,10 @@
       justify-content: center;
       gap: 6px;
       flex-wrap: wrap;
-      margin-top: 8px;
+      margin-top: 2px;
       padding: 6px 10px;
       border-radius: 999px;
-      background: rgba(14, 25, 45, 0.75);
+      background: rgba(14, 25, 45, 0.78);
       border: 1px solid var(--border);
       backdrop-filter: blur(10px);
     }
@@ -420,7 +214,7 @@
       font-size: 0.95rem;
     }
 
-    /* Chat Stream (Gemini-style clean messages) */
+    /* Chat Stream (Gemini-style clean messages — no ugly scrollbar!) */
     .chat-stream {
       flex: 1;
       overflow-y: auto;
@@ -429,6 +223,11 @@
       flex-direction: column;
       gap: 18px;
       scroll-behavior: smooth;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .chat-stream::-webkit-scrollbar {
+      display: none;
     }
 
     .msg-row {
@@ -675,31 +474,12 @@
 <!-- مساحة الشات الرئيسية بأسلوب Gemini + الروبوت الطائر -->
 <main class="app-container">
 
-  <!-- نانو 3D عالي الدقة + أزرار الأنيميشن -->
+  <!-- نانو 3D حقيقي تفاعلي (Three.js) بحركات عشوائية تلقائية -->
   <div class="mascot-stage">
-    <div class="mascot-arena" id="mascotArena">
-      <div class="mascot-wrap state-idle anim-fly" id="mascot" title="اضغط عليّ للترحيب!">
-        <div class="mascot-glow"></div>
-        <div class="landing-pad"></div>
-        <img src="nano.jpg" alt="نانو — المساعد الذكي الطائر" class="nano-img" />
-        <div class="voice-wave" aria-hidden="true">
-          <span></span><span></span><span></span><span></span><span></span>
-        </div>
-      </div>
+    <div class="mascot-arena" id="mascot" title="اضغط على نانو للترحيب!">
+      <canvas id="nano3d"></canvas>
     </div>
-
-    <!-- أزرار تحريك نانو (يطير، يقعد، يرقص، يلف، يتحرك، يحتفل، يحيّي) -->
-    <div class="anim-controls" role="toolbar" aria-label="حركات نانو">
-      <button type="button" class="anim-btn active" data-anim="fly">🛸 طيران</button>
-      <button type="button" class="anim-btn" data-anim="sit">🪑 اقعد</button>
-      <button type="button" class="anim-btn" data-anim="patrol">⚡ تحرّك</button>
-      <button type="button" class="anim-btn" data-anim="dance">💃 رقص</button>
-      <button type="button" class="anim-btn" data-anim="spin">🌀 لفّة 360°</button>
-      <button type="button" class="anim-btn" data-anim="celebrate">🎉 احتفال</button>
-      <button type="button" class="anim-btn" data-anim="wave">👋 تحيّة</button>
-    </div>
-
-    <div class="mascot-status-pill" id="mascotStatus">✨ نانو يطير وجاهز للاستماع إليك</div>
+    <div class="mascot-status-pill" id="mascotStatus">🛸 نانو يطير بمراوحه 3D وجاهز للاستماع إليك</div>
   </div>
 
   <!-- ترحيب Gemini -->
@@ -796,71 +576,494 @@
   const chatForm = document.getElementById('chatForm');
   const chatInput = document.getElementById('chatInput');
 
-  const ANIM_CLASSES = ['anim-fly', 'anim-sit', 'anim-patrol', 'anim-dance', 'anim-spin', 'anim-celebrate', 'anim-wave'];
   const ANIM_LABELS = {
-    fly: '🛸 نانو يطير وجاهز للاستماع إليك',
-    sit: '🪑 نانو قاعد ومستريح على القاعدة',
-    patrol: '⚡ نانو يتحرك ويفحص المكان!',
-    dance: '💃 نانو يرقص بحماس!',
-    spin: '🌀 نانو يعمل لفّة 360 درجة!',
-    celebrate: '🎉 نانو يحتفل معكم في الفعالية!',
-    wave: '👋 نانو يحيّي جمهور Agentic Mind!'
+    fly: '🛸 نانو يطير بمراوحه 3D وجاهز للاستماع إليك',
+    sit: '😴 نانو هبط وطفّى مراوحه وقعد يستريح',
+    patrol: '⚡ نانو يعمل جولة 3D ويفحص المكان!',
+    dance: '💃 نانو يرقص ويحرّك أجنحته بحماس!',
+    spin: '🌀 نانو يعمل شقلبة 360° حقيقية في الهواء!',
+    celebrate: '🎉 نانو يحتفل مع شرارات 3D!',
+    wave: '👋 نانو يقترب ويلوّح لكم بالتحية!'
   };
 
-  function spawnSparkles() {
-    const colors = ['#fde047', '#38bdf8', '#c084fc', '#4ade80', '#ffffff'];
-    for (let i = 0; i < 16; i++) {
-      const sp = document.createElement('span');
-      sp.className = 'sparkle';
-      const angle = (Math.PI * 2 * i) / 16 + Math.random() * 0.25;
-      const dist = 65 + Math.random() * 55;
-      sp.style.background = colors[i % colors.length];
-      sp.style.setProperty('--tx', `${Math.cos(angle) * dist}px`);
-      sp.style.setProperty('--ty', `${Math.sin(angle) * dist}px`);
-      mascot.appendChild(sp);
-      setTimeout(() => sp.remove(), 950);
-    }
-  }
+  let currentAnimMode = 'fly';
+  let currentConvState = 'idle'; // idle | listening | thinking | talking
+  let mouseNX = 0, mouseNY = 0;
 
-  function setNanoAnim(mode) {
-    mascot.classList.remove(...ANIM_CLASSES);
-    mascot.classList.add('anim-' + mode);
-    document.querySelectorAll('.anim-btn').forEach(b => {
-      b.classList.toggle('active', b.dataset.anim === mode);
-    });
-    mascotStatus.textContent = ANIM_LABELS[mode] || '✨ نانو جاهز';
-    if (mode === 'celebrate' || mode === 'wave') spawnSparkles();
-  }
-
-  document.querySelectorAll('.anim-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const mode = btn.dataset.anim;
-      mascot.classList.remove('state-listening', 'state-thinking', 'state-talking');
-      mascot.classList.add('state-idle');
-      setNanoAnim(mode);
-      if (mode === 'wave') {
-        streamBotReply('أهلاً وسهلاً بكل طلاب الـ IT والأعمال! 👋🛸 أنا نانو، سعيد جداً بشوفتكم في الفعالية!');
-      }
-    });
+  window.addEventListener('mousemove', (e) => {
+    mouseNX = (e.clientX / window.innerWidth) * 2 - 1;
+    mouseNY = -((e.clientY / window.innerHeight) * 2 - 1);
   });
 
-  function setMascotState(state, label) {
-    mascot.classList.remove('state-idle', 'state-listening', 'state-thinking', 'state-talking');
-    if (state !== 'idle') {
-      // إذا كان نانو قاعداً، يقلع تلقائياً عند التفاعل!
-      if (mascot.classList.contains('anim-sit')) setNanoAnim('fly');
+  // ====== محرك نانو 3D الحقيقي (Three.js) ======
+  let trigger3DSparkles = () => {};
+
+  (function initNano3D() {
+    const canvas3d = document.getElementById('nano3d');
+    if (!window.THREE || !canvas3d) return;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(36, canvas3d.clientWidth / canvas3d.clientHeight, 0.1, 100);
+    camera.position.set(0, 0.35, 6.2);
+
+    const renderer = new THREE.WebGLRenderer({ canvas: canvas3d, alpha: true, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(canvas3d.clientWidth, canvas3d.clientHeight, false);
+    renderer.outputEncoding = THREE.sRGBEncoding;
+
+    // إضاءة استوديو 3D فخمة
+    scene.add(new THREE.AmbientLight(0xdbeafe, 0.9));
+    const keyLight = new THREE.DirectionalLight(0xfff7ed, 1.4);
+    keyLight.position.set(4, 6, 6);
+    scene.add(keyLight);
+    const rimLight = new THREE.PointLight(0x38bdf8, 2.2, 14);
+    rimLight.position.set(-4, 2, 3);
+    scene.add(rimLight);
+    const underLight = new THREE.PointLight(0x2dd4bf, 1.4, 8);
+    underLight.position.set(0, -2, 1.5);
+    scene.add(underLight);
+
+    // قاعدة الهبوط المضيئة (Landing Pad)
+    const padGroup = new THREE.Group();
+    padGroup.position.set(0, -1.35, 0);
+    const padRing = new THREE.Mesh(
+      new THREE.TorusGeometry(1.15, 0.045, 16, 48),
+      new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.65 })
+    );
+    padRing.rotation.x = Math.PI / 2;
+    padGroup.add(padRing);
+    const padDisc = new THREE.Mesh(
+      new THREE.CircleGeometry(1.1, 36),
+      new THREE.MeshBasicMaterial({ color: 0x0ea5e9, transparent: true, opacity: 0.14, side: THREE.DoubleSide })
+    );
+    padDisc.rotation.x = -Math.PI / 2;
+    padGroup.add(padDisc);
+    scene.add(padGroup);
+
+    // شاشة الوجه الديناميكية (CanvasTexture -> رمش، حركة عيون، فم يتكلم، نوم!)
+    const faceCanvas = document.createElement('canvas');
+    faceCanvas.width = 512;
+    faceCanvas.height = 320;
+    const fctx = faceCanvas.getContext('2d');
+    const faceTex = new THREE.CanvasTexture(faceCanvas);
+
+    let blinkTimer = 0;
+    let isBlinking = false;
+
+    function drawFace(t) {
+      // خلفية الشاشة التركوازية المضيئة
+      const grad = fctx.createRadialGradient(256, 150, 20, 256, 160, 260);
+      grad.addColorStop(0, '#ccfbf1');
+      grad.addColorStop(0.55, '#5eead4');
+      grad.addColorStop(1, '#0d9488');
+      fctx.fillStyle = grad;
+      fctx.fillRect(0, 0, 512, 320);
+
+      // لمعة زجاج الشاشة
+      fctx.fillStyle = 'rgba(255,255,255,0.22)';
+      fctx.beginPath();
+      fctx.ellipse(180, 52, 130, 26, -0.1, 0, Math.PI * 2);
+      fctx.fill();
+
+      const lookX = Math.max(-14, Math.min(14, mouseNX * 18));
+      const lookY = currentConvState === 'listening' ? 14 : Math.max(-10, Math.min(10, -mouseNY * 12));
+
+      // حالة النوم/الاستراحة
+      if (currentAnimMode === 'sit' && currentConvState === 'idle') {
+        fctx.strokeStyle = '#0f172a';
+        fctx.lineWidth = 11;
+        fctx.lineCap = 'round';
+        // عيون نائمة مغمضة بلطف
+        fctx.beginPath(); fctx.arc(178, 132, 26, 0.15 * Math.PI, 0.85 * Math.PI); fctx.stroke();
+        fctx.beginPath(); fctx.arc(334, 132, 26, 0.15 * Math.PI, 0.85 * Math.PI); fctx.stroke();
+        // ابتسامة هادئة
+        fctx.lineWidth = 9;
+        fctx.beginPath(); fctx.arc(256, 192, 34, 0.15 * Math.PI, 0.85 * Math.PI); fctx.stroke();
+        // Zzz
+        fctx.fillStyle = '#0f766e';
+        fctx.font = 'bold 34px sans-serif';
+        const zy = Math.sin(t * 2.5) * 8;
+        fctx.fillText('z', 392, 90 + zy);
+        fctx.font = 'bold 46px sans-serif';
+        fctx.fillText('Z', 420, 65 - zy);
+        faceTex.needsUpdate = true;
+        return;
+      }
+
+      // حالة الفرح (رقص أو احتفال)
+      const happyEyes = (currentAnimMode === 'dance' || currentAnimMode === 'celebrate') && currentConvState === 'idle';
+      const winkRight = currentAnimMode === 'wave' && Math.sin(t * 5) > 0.35;
+
+      // الحواجب
+      fctx.strokeStyle = '#0f172a';
+      fctx.lineWidth = 8;
+      fctx.lineCap = 'round';
+      const browLift = currentConvState === 'thinking' ? -10 : (currentConvState === 'talking' ? Math.sin(t * 14) * 4 : 0);
+      fctx.beginPath(); fctx.moveTo(148 + lookX * 0.5, 84 + browLift); fctx.quadraticCurveTo(178 + lookX * 0.5, 70 + browLift, 206 + lookX * 0.5, 82 + browLift); fctx.stroke();
+      fctx.beginPath(); fctx.moveTo(306 + lookX * 0.5, 82 + browLift); fctx.quadraticCurveTo(334 + lookX * 0.5, 70 + browLift, 364 + lookX * 0.5, 84 + browLift); fctx.stroke();
+
+      // العيون
+      function drawEye(cx, cy, isRight) {
+        if (happyEyes || (isRight && winkRight)) {
+          fctx.strokeStyle = '#0f172a';
+          fctx.lineWidth = 12;
+          fctx.beginPath();
+          fctx.arc(cx, cy + 10, 26, 1.15 * Math.PI, 1.85 * Math.PI);
+          fctx.stroke();
+          return;
+        }
+        if (isBlinking) {
+          fctx.strokeStyle = '#0f172a';
+          fctx.lineWidth = 10;
+          fctx.beginPath(); fctx.moveTo(cx - 24, cy); fctx.lineTo(cx + 24, cy); fctx.stroke();
+          return;
+        }
+        fctx.fillStyle = '#0f172a';
+        fctx.beginPath();
+        fctx.ellipse(cx + lookX, cy + lookY, 20, 27, 0, 0, Math.PI * 2);
+        fctx.fill();
+        fctx.fillStyle = '#ffffff';
+        fctx.beginPath();
+        fctx.arc(cx + lookX + 7, cy + lookY - 9, 7, 0, Math.PI * 2);
+        fctx.fill();
+      }
+      drawEye(178, 134, false);
+      drawEye(334, 134, true);
+
+      // الفم (يتحرك فعلياً أثناء الكلام!)
+      if (currentConvState === 'talking') {
+        const open = 16 + Math.abs(Math.sin(t * 17)) * 34 + Math.abs(Math.cos(t * 25)) * 12;
+        fctx.fillStyle = '#0f172a';
+        fctx.beginPath();
+        fctx.ellipse(256, 212, 46, open * 0.65, 0, 0, Math.PI * 2);
+        fctx.fill();
+        // لسان لطيف
+        fctx.fillStyle = '#fb7185';
+        fctx.beginPath();
+        fctx.ellipse(256, 212 + open * 0.3, 24, open * 0.25, 0, 0, Math.PI * 2);
+        fctx.fill();
+      } else if (currentConvState === 'thinking') {
+        fctx.strokeStyle = '#0f172a';
+        fctx.lineWidth = 10;
+        fctx.beginPath();
+        fctx.arc(266, 214, 18, 0, Math.PI * 2);
+        fctx.stroke();
+      } else {
+        // ابتسامة نانو الكبيرة
+        fctx.fillStyle = '#ffffff';
+        fctx.strokeStyle = '#0f172a';
+        fctx.lineWidth = 9;
+        fctx.beginPath();
+        fctx.moveTo(192, 194);
+        fctx.quadraticCurveTo(256, 272, 320, 194);
+        fctx.quadraticCurveTo(256, 212, 192, 194);
+        fctx.closePath();
+        fctx.fill();
+        fctx.stroke();
+      }
+      faceTex.needsUpdate = true;
     }
-    mascot.classList.add('state-' + state);
+
+    // بناء مجسم نانو 3D الكامل
+    const nanoRoot = new THREE.Group();
+    const nanoBody = new THREE.Group();
+    nanoRoot.add(nanoBody);
+    scene.add(nanoRoot);
+
+    const goldMat = new THREE.MeshStandardMaterial({
+      color: 0xfacc15, metalness: 0.35, roughness: 0.22
+    });
+    const darkGoldMat = new THREE.MeshStandardMaterial({
+      color: 0xca8a04, metalness: 0.55, roughness: 0.3
+    });
+    const ringMat = new THREE.MeshStandardMaterial({
+      color: 0x1e293b, metalness: 0.72, roughness: 0.25
+    });
+    const bladeMat = new THREE.MeshStandardMaterial({
+      color: 0xfde047, metalness: 0.3, roughness: 0.25, transparent: true, opacity: 0.88
+    });
+
+    // القبة الصفراء الرئيسية
+    const domeGeo = new THREE.SphereGeometry(0.92, 36, 24, 0, Math.PI * 2, 0, Math.PI * 0.6);
+    const dome = new THREE.Mesh(domeGeo, goldMat);
+    dome.position.y = -0.12;
+    nanoBody.add(dome);
+
+    // قاعدة القبة السفلية
+    const baseCap = new THREE.Mesh(new THREE.CylinderGeometry(0.87, 0.78, 0.22, 36), darkGoldMat);
+    baseCap.position.y = -0.45;
+    nanoBody.add(baseCap);
+
+    // تاج/قبعة نانو العلوية
+    const crown = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.2, 0.22, 24), goldMat);
+    crown.position.y = 0.84;
+    nanoBody.add(crown);
+
+    // الجوهرة التركوازية المضيئة في الجبهة
+    const gem = new THREE.Mesh(
+      new THREE.SphereGeometry(0.11, 20, 20),
+      new THREE.MeshStandardMaterial({ color: 0x2dd4bf, emissive: 0x14b8a6, emissiveIntensity: 0.8, roughness: 0.1 })
+    );
+    gem.position.set(0, 0.55, 0.72);
+    nanoBody.add(gem);
+
+    // شاشة الوجه 3D (أمام القبة تماماً بدون أي تداخل!)
+    const screenMat = new THREE.MeshBasicMaterial({ map: faceTex });
+    const screenMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.06, 0.64), screenMat);
+    screenMesh.position.set(0, 0.08, 0.96);
+    nanoBody.add(screenMesh);
+
+    // إطار الشاشة
+    const bezel = new THREE.Mesh(
+      new THREE.BoxGeometry(1.14, 0.72, 0.08),
+      new THREE.MeshStandardMaterial({ color: 0x0f766e, metalness: 0.5, roughness: 0.3 })
+    );
+    bezel.position.set(0, 0.08, 0.91);
+    nanoBody.add(bezel);
+
+    // دالة بناء مروحة 3D كاملة (ذراع + حلقة معدنية + شفرات تدور 3D!)
+    const rotorBlades = [];
+    function createRotor(armStart, armEnd, ringRadius, ringRot) {
+      const group = new THREE.Group();
+      const dir = new THREE.Vector3().subVectors(armEnd, armStart);
+      const strut = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, dir.length(), 12), darkGoldMat);
+      strut.position.copy(armStart).addScaledVector(dir, 0.5);
+      strut.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.clone().normalize());
+      group.add(strut);
+
+      const housing = new THREE.Group();
+      housing.position.copy(armEnd);
+      housing.rotation.set(ringRot.x, ringRot.y, ringRot.z);
+
+      const outerRing = new THREE.Mesh(new THREE.TorusGeometry(ringRadius, 0.075, 14, 36), ringMat);
+      housing.add(outerRing);
+      const goldTrim = new THREE.Mesh(new THREE.TorusGeometry(ringRadius + 0.03, 0.025, 10, 36), goldMat);
+      housing.add(goldTrim);
+
+      const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.09, 14), ringMat);
+      hub.rotation.x = Math.PI / 2;
+      housing.add(hub);
+
+      const bladeGroup = new THREE.Group();
+      for (let k = 0; k < 3; k++) {
+        const b = new THREE.Mesh(new THREE.BoxGeometry(ringRadius * 1.65, 0.09, 0.02), bladeMat);
+        b.rotation.z = (k * Math.PI) / 3;
+        bladeGroup.add(b);
+      }
+      housing.add(bladeGroup);
+      rotorBlades.push(bladeGroup);
+      group.add(housing);
+      nanoBody.add(group);
+      return { group, housing };
+    }
+
+    // المروحتان العلويتان + المروحتان السفليتان (مثل صورة نانو تماماً!)
+    const leftRotor = createRotor(new THREE.Vector3(-0.82, -0.1, 0), new THREE.Vector3(-1.72, 0.02, 0.08), 0.62, new THREE.Euler(1.15, 0.25, 0.15));
+    const rightRotor = createRotor(new THREE.Vector3(0.82, -0.1, 0), new THREE.Vector3(1.72, 0.08, 0.08), 0.62, new THREE.Euler(1.15, -0.25, -0.15));
+    const lowLeft = createRotor(new THREE.Vector3(-0.46, -0.45, 0.12), new THREE.Vector3(-0.74, -1.08, 0.25), 0.44, new THREE.Euler(0.35, 1.1, 0.2));
+    const lowRight = createRotor(new THREE.Vector3(0.46, -0.45, 0.12), new THREE.Vector3(0.74, -1.08, 0.25), 0.44, new THREE.Euler(0.35, -1.1, -0.2));
+
+    // شرارات 3D للاحتفال
+    const sparks = [];
+    const sparkGeo = new THREE.SphereGeometry(0.06, 8, 8);
+    trigger3DSparkles = () => {
+      const palette = [0xfde047, 0x38bdf8, 0xc084fc, 0x4ade80, 0xffffff];
+      for (let i = 0; i < 24; i++) {
+        const m = new THREE.Mesh(sparkGeo, new THREE.MeshBasicMaterial({ color: palette[i % palette.length] }));
+        m.position.copy(nanoRoot.position);
+        const theta = Math.random() * Math.PI * 2;
+        const phi = Math.random() * Math.PI;
+        const spd = 0.04 + Math.random() * 0.07;
+        m.userData = {
+          vx: Math.sin(phi) * Math.cos(theta) * spd,
+          vy: Math.cos(phi) * spd + 0.03,
+          vz: Math.sin(phi) * Math.sin(theta) * spd,
+          life: 1.0
+        };
+        scene.add(m);
+        sparks.push(m);
+      }
+    };
+
+    // حلقة الأنيميشن 60 FPS الحقيقية!
+    const clock = new THREE.Clock();
+    let rotorSpeed = 0.35;
+    let spinAngle = 0;
+
+    function animate() {
+      requestAnimationFrame(animate);
+      const dt = Math.min(clock.getDelta(), 0.05);
+      const t = clock.elapsedTime;
+
+      // الرمش الطبيعي
+      blinkTimer += dt;
+      if (blinkTimer > 3.6) { isBlinking = true; }
+      if (blinkTimer > 3.76) { isBlinking = false; blinkTimer = 0; }
+      drawFace(t);
+
+      // الأهداف الحركية حسب الوضع الحالي
+      let targetX = 0, targetY = 0.25, targetZ = 0;
+      let targetRotX = 0, targetRotY = mouseNX * 0.28, targetRotZ = 0;
+      let targetRotorSpeed = 0.36;
+
+      if (currentConvState === 'talking') {
+        targetY = 0.32 + Math.sin(t * 10) * 0.1;
+        targetRotX = Math.sin(t * 8) * 0.08;
+        targetRotY = Math.sin(t * 4) * 0.15;
+        targetRotorSpeed = 0.5;
+      } else if (currentConvState === 'thinking') {
+        targetY = 0.42 + Math.sin(t * 5) * 0.12;
+        targetRotZ = Math.sin(t * 5) * 0.16;
+        targetRotY = Math.sin(t * 3) * 0.35;
+        targetRotorSpeed = 0.6;
+      } else if (currentAnimMode === 'sit') {
+        // يهبط ويقعد على القاعدة ويطفي المراوح تدريجياً!
+        targetY = -0.32 + Math.sin(t * 2) * 0.02;
+        targetRotX = 0.1;
+        targetRotY = 0;
+        targetRotorSpeed = 0.0;
+      } else if (currentAnimMode === 'patrol') {
+        // جولة 3D بشكل رقم 8 مع ميلان واقعي في الطيران!
+        targetX = Math.sin(t * 1.4) * 1.85;
+        targetY = 0.3 + Math.sin(t * 2.8) * 0.28;
+        targetZ = Math.cos(t * 1.4) * 0.55;
+        targetRotZ = -Math.cos(t * 1.4) * 0.32;
+        targetRotY = Math.cos(t * 1.4) * 0.45;
+        targetRotorSpeed = 0.52;
+      } else if (currentAnimMode === 'dance') {
+        targetX = Math.sin(t * 5) * 0.35;
+        targetY = 0.25 + Math.abs(Math.sin(t * 5)) * 0.36;
+        targetRotZ = Math.sin(t * 5) * 0.28;
+        targetRotY = Math.cos(t * 2.5) * 0.4;
+        targetRotorSpeed = 0.48;
+      } else if (currentAnimMode === 'spin') {
+        targetY = 0.38 + Math.sin(t * 4) * 0.18;
+        spinAngle += dt * 5.2;
+        targetRotY = spinAngle;
+        targetRotX = Math.sin(spinAngle) * 0.25;
+        targetRotorSpeed = 0.62;
+      } else if (currentAnimMode === 'celebrate') {
+        targetY = 0.15 + Math.abs(Math.sin(t * 7)) * 0.65;
+        targetRotZ = Math.sin(t * 7) * 0.22;
+        targetRotY = Math.sin(t * 3.5) * 0.45;
+        targetRotorSpeed = 0.58;
+        if (Math.random() < 0.06) trigger3DSparkles();
+      } else if (currentAnimMode === 'wave') {
+        targetZ = 1.15;
+        targetY = 0.22 + Math.sin(t * 6) * 0.1;
+        targetRotY = -0.18 + Math.sin(t * 6) * 0.15;
+        targetRotZ = Math.sin(t * 6) * 0.12;
+        targetRotorSpeed = 0.45;
+      } else {
+        // طيران طبيعي سلس
+        targetY = 0.28 + Math.sin(t * 2.4) * 0.16;
+        targetRotZ = Math.sin(t * 1.6) * 0.06;
+        targetRotX = -mouseNY * 0.15;
+      }
+
+      // انتقال ناعم (Lerp)
+      nanoRoot.position.x += (targetX - nanoRoot.position.x) * 0.08;
+      nanoRoot.position.y += (targetY - nanoRoot.position.y) * 0.08;
+      nanoRoot.position.z += (targetZ - nanoRoot.position.z) * 0.08;
+
+      nanoBody.rotation.x += (targetRotX - nanoBody.rotation.x) * 0.1;
+      if (currentAnimMode === 'spin' && currentConvState === 'idle') {
+        nanoBody.rotation.y = targetRotY;
+      } else {
+        spinAngle = nanoBody.rotation.y;
+        nanoBody.rotation.y += (targetRotY - nanoBody.rotation.y) * 0.1;
+      }
+      nanoBody.rotation.z += (targetRotZ - nanoBody.rotation.z) * 0.1;
+
+      // تحريك ذراع المروحة اليمنى للتحية!
+      rightRotor.housing.rotation.z = currentAnimMode === 'wave'
+        ? -0.15 + Math.sin(t * 11) * 0.45
+        : -0.15;
+
+      // تدوير المراوح الأربعة بشكل مستقل
+      rotorSpeed += (targetRotorSpeed - rotorSpeed) * 0.06;
+      rotorBlades.forEach((b, idx) => {
+        b.rotation.z += (idx % 2 === 0 ? 1 : -1) * rotorSpeed;
+      });
+
+      // لمعان قاعدة الهبوط
+      padRing.material.opacity = currentAnimMode === 'sit' ? 0.95 : 0.45 + Math.sin(t * 3) * 0.15;
+      padRing.rotation.z = t * 0.5;
+
+      // تحديث الشرارات 3D
+      for (let i = sparks.length - 1; i >= 0; i--) {
+        const s = sparks[i];
+        s.position.x += s.userData.vx;
+        s.position.y += s.userData.vy;
+        s.position.z += s.userData.vz;
+        s.userData.vy -= 0.002;
+        s.userData.life -= 0.025;
+        s.scale.setScalar(Math.max(0.01, s.userData.life));
+        if (s.userData.life <= 0) {
+          scene.remove(s);
+          sparks.splice(i, 1);
+        }
+      }
+
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+      const w = canvas3d.clientWidth;
+      const h = canvas3d.clientHeight;
+      if (!w || !h) return;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h, false);
+    });
+  })();
+
+  function setNanoAnim(mode) {
+    currentAnimMode = mode;
+    mascotStatus.textContent = ANIM_LABELS[mode] || '✨ نانو جاهز';
+    if (mode === 'celebrate' || mode === 'wave') trigger3DSparkles();
+  }
+
+  // حركات نانو العشوائية التلقائية (Random Autonomous AI Behavior!)
+  const RANDOM_MOVES = ['fly', 'patrol', 'dance', 'spin', 'sit', 'celebrate', 'wave'];
+  let autoTimer = null;
+
+  function scheduleNextRandomMove() {
+    clearTimeout(autoTimer);
+    // كل 5 إلى 8 ثواني يختار نانو حركة جديدة عشوائياً وهو واقف!
+    const delay = currentAnimMode === 'fly' ? (4500 + Math.random() * 3000) : (3200 + Math.random() * 2500);
+    autoTimer = setTimeout(() => {
+      if (currentConvState === 'idle') {
+        // غالباً يرجع للطيران بين الحركات عشان يكون طبيعي ولطيف
+        if (currentAnimMode !== 'fly' && Math.random() < 0.5) {
+          setNanoAnim('fly');
+        } else {
+          const choices = RANDOM_MOVES.filter(m => m !== currentAnimMode);
+          const next = choices[Math.floor(Math.random() * choices.length)];
+          setNanoAnim(next);
+        }
+      }
+      scheduleNextRandomMove();
+    }, delay);
+  }
+  scheduleNextRandomMove();
+
+  function setMascotState(state, label) {
+    currentConvState = state;
+    if (state !== 'idle' && currentAnimMode === 'sit') {
+      setNanoAnim('fly');
+    }
     mascotStatus.textContent = label;
   }
 
   // الروبوت ينتبه لما المستخدم يبدأ يكتب
   chatInput.addEventListener('input', () => {
-    if (mascot.classList.contains('state-talking') || mascot.classList.contains('state-thinking')) return;
+    if (currentConvState === 'talking' || currentConvState === 'thinking') return;
     if (chatInput.value.trim().length > 0) {
       setMascotState('listening', '👂 أسمعك... اكتب رسالتك');
     } else {
-      setMascotState('idle', '✨ جاهز للاستماع إليك');
+      setMascotState('idle', ANIM_LABELS[currentAnimMode] || '✨ جاهز للاستماع إليك');
     }
   });
 
@@ -941,8 +1144,9 @@
 
   // تفاعل لطيف عند الضغط على الروبوت
   mascot.addEventListener('click', () => {
-    if (mascot.classList.contains('state-talking')) return;
-    streamBotReply('أهلاً بك! 👋 أنا نانو، ذكاء اصطناعي محلي طائر من مشروع Agentic Mind ✨\nبياناتك بتضل عندك وما بتروح لأي شركة، وبتتعلّم مني وبربّيني على إيديك — اكتبلي أو اضغط 🎤 واحكي معي!');
+    if (currentConvState === 'talking') return;
+    trigger3DSparkles();
+    streamBotReply('أهلاً بك! 👋 أنا نانو 3D، ذكاء اصطناعي محلي طائر من مشروع Agentic Mind ✨\nبياناتك بتضل عندك وما بتروح لأي شركة، وبتتعلّم مني وبربّيني على إيديك — اكتبلي أو اضغط 🎤 واحكي معي!');
   });
 
   function addUserBubble(text) {
