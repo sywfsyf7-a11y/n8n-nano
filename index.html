@@ -414,6 +414,34 @@
     }
     .send-circle:hover { transform: scale(1.07); }
 
+    .mic-circle {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text);
+      font-size: 1.05rem;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .mic-circle:hover { background: rgba(56, 189, 248, 0.18); border-color: var(--cyan); }
+    .mic-circle.recording {
+      background: #ef4444;
+      border-color: #fca5a5;
+      color: #fff;
+      box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+      animation: micPulse 1.2s infinite;
+    }
+    @keyframes micPulse {
+      0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+      70% { box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+
     .disclaimer {
       text-align: center;
       font-size: 0.74rem;
@@ -495,6 +523,7 @@
     <span class="brand-tag">AI Live</span>
   </div>
   <div class="header-btns">
+    <button class="pill-btn" id="toggleVoiceBtn" title="تشغيل/كتم صوت نانو">🔇 الصوت: مكتوم</button>
     <button class="pill-btn" id="openTeamBtn">👥 فريق العمل</button>
     <button class="pill-btn" id="openConfigBtn">⚙️ ربط n8n</button>
   </div>
@@ -619,8 +648,8 @@
 
   <!-- ترحيب Gemini -->
   <div class="welcome-hero" id="welcomeHero">
-    <h1>أهلاً! أنا نانو — مساعد Agentic Mind</h1>
-    <p>اسألني أي شيء — فريق الذكاء الاصطناعي ينفّذ، والإنسان يقود القرار</p>
+    <h1>أهلاً! أنا نانو — ذكاء اصطناعي محلي طائر</h1>
+    <p>خصوصيتك محفوظة 100% بدون إرسال بياناتك للشركات • يتعلّم منك ويُربّى على إيديك</p>
   </div>
 
   <!-- رسائل المحادثة -->
@@ -628,20 +657,20 @@
 
   <!-- أزرار سريعة -->
   <div class="suggestions" id="suggestions">
-    <button class="chip" data-q="عرّفني عن نفسك وعن فريق Agentic Mind">✨ مين إنت يا نانو؟</button>
-    <button class="chip" data-q="كيف بتساعد طلاب تكنولوجيا المعلومات (IT)؟">💻 لطلاب الـ IT</button>
-    <button class="chip" data-q="كيف بتساعد طلاب إدارة الأعمال (Business)؟">💼 لطلاب الأعمال</button>
-    <button class="chip" data-q="هل الذكاء الاصطناعي رح يستبدل العنصر البشري؟">🤝 دور الإنسان والـ AI</button>
-    <button class="chip" data-q="اعطيني فكرة مشروع أتمتة يجمع IT والأعمال">🚀 فكرة مشروع ذكي</button>
+    <button class="chip" data-q="مين إنت يا نانو وشو فكرتك؟">✨ مين إنت يا نانو؟</button>
+    <button class="chip" data-q="شو يعني ذكاء اصطناعي محلي وحفظ الخصوصية؟">🔒 ذكاء محلي وخصوصية</button>
+    <button class="chip" data-q="كيف بتتعلّم مني وبربّيك على إيدي؟">🧠 كيف بتتعلّم مني؟</button>
+    <button class="chip" data-q="شو الرؤية المستقبلية لمشروع نانو للشركات والدول؟">🚀 الرؤية المستقبلية (Business & IT)</button>
   </div>
 
-  <!-- شريط الإدخال السفلي بأسلوب Gemini -->
+  <!-- شريط الإدخال السفلي بأسلوب Gemini + زر المايك للفعالية -->
   <div class="input-dock">
     <form class="input-pill" id="chatForm">
-      <input type="text" id="chatInput" placeholder="تحدّث مع مساعد Agentic Mind..." autocomplete="off" required />
+      <button type="button" class="mic-circle" id="micBtn" title="اضغط للتحدث مع نانو (ثم اضغط للإغلاق)">🎤</button>
+      <input type="text" id="chatInput" placeholder="اكتب لنانو أو اضغط 🎤 للتحدث معه..." autocomplete="off" required />
       <button type="submit" class="send-circle" title="إرسال">➤</button>
     </form>
-    <div class="disclaimer" id="connectionNote">Agentic Mind • مشروع أتمتة يجمع تخصصي تكنولوجيا المعلومات (IT) والأعمال (Business)</div>
+    <div class="disclaimer" id="connectionNote">Agentic Mind • نانو: نموذج أولي تفاعلي للذكاء الاصطناعي المحلي الطائر (IT & Business)</div>
   </div>
 </main>
 
@@ -727,10 +756,85 @@
     }
   });
 
+  let voiceEnabled = false;
+  const toggleVoiceBtn = document.getElementById('toggleVoiceBtn');
+  toggleVoiceBtn.addEventListener('click', () => {
+    voiceEnabled = !voiceEnabled;
+    toggleVoiceBtn.textContent = voiceEnabled ? '🔊 الصوت: شغّال' : '🔇 الصوت: مكتوم';
+    if (!voiceEnabled && 'speechSynthesis' in window) window.speechSynthesis.cancel();
+  });
+
+  function speakText(text) {
+    if (!voiceEnabled || !('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const clean = text.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, '');
+    const utter = new SpeechSynthesisUtterance(clean);
+    utter.lang = /[\u0600-\u06FF]/.test(clean) ? 'ar-SA' : 'en-US';
+    utter.rate = 1.05;
+    window.speechSynthesis.speak(utter);
+  }
+
+  // زر المايك (افتح للتحدث، وأغلقه فوراً في الأماكن المزدحمة)
+  const micBtn = document.getElementById('micBtn');
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let recognition = null;
+  let isRecording = false;
+
+  if (SpeechRecognition) {
+    recognition = new SpeechRecognition();
+    recognition.lang = 'ar-JO';
+    recognition.interimResults = true;
+    recognition.continuous = false;
+
+    recognition.onstart = () => {
+      isRecording = true;
+      micBtn.classList.add('recording');
+      micBtn.textContent = '⏹️';
+      setMascotState('listening', '🎤 أسمعك الآن... اضغط ⏹️ عند الانتهاء');
+    };
+
+    recognition.onresult = (event) => {
+      let transcript = '';
+      for (let i = 0; i < event.results.length; i++) {
+        transcript += event.results[i][0].transcript;
+      }
+      chatInput.value = transcript;
+    };
+
+    recognition.onend = () => {
+      isRecording = false;
+      micBtn.classList.remove('recording');
+      micBtn.textContent = '🎤';
+      if (chatInput.value.trim()) {
+        handleUserMessage(chatInput.value);
+      } else {
+        setMascotState('idle', '✨ جاهز للاستماع إليك');
+      }
+    };
+
+    recognition.onerror = () => {
+      isRecording = false;
+      micBtn.classList.remove('recording');
+      micBtn.textContent = '🎤';
+      setMascotState('idle', '✨ جاهز (اكتب أو جرّب المايك)');
+    };
+
+    micBtn.addEventListener('click', () => {
+      if (isRecording) {
+        recognition.stop();
+      } else {
+        chatInput.value = '';
+        recognition.start();
+      }
+    });
+  } else {
+    micBtn.style.display = 'none';
+  }
+
   // تفاعل لطيف عند الضغط على الروبوت
   mascot.addEventListener('click', () => {
     if (mascot.classList.contains('state-talking')) return;
-    streamBotReply('أهلاً بك! 👋 أنا نانو، الذكاء الاصطناعي الطائر من فريق Agentic Mind ✨\nموجود هنا لأساعد طلاب تكنولوجيا المعلومات والأعمال بأفكار الأتمتة والمشاريع الذكية — اسألني أي شيء!');
+    streamBotReply('أهلاً بك! 👋 أنا نانو، ذكاء اصطناعي محلي طائر من مشروع Agentic Mind ✨\nبياناتك بتضل عندك وما بتروح لأي شركة، وبتتعلّم مني وبربّيني على إيديك — اكتبلي أو اضغط 🎤 واحكي معي!');
   });
 
   function addUserBubble(text) {
@@ -746,7 +850,8 @@
   // كتابة الرد تدريجياً مثل Gemini مع تحريك فم الروبوت!
   function streamBotReply(fullText) {
     welcomeHero.classList.add('compact');
-    setMascotState('talking', '🗣️ يتحدث معك الآن...');
+    setMascotState('talking', '🗣️ نانو يتحدث معك الآن...');
+    speakText(fullText);
 
     const row = document.createElement('div');
     row.className = 'msg-row bot';
@@ -783,11 +888,17 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'sendMessage', sessionId, chatInput: text })
         });
-        const data = await res.json();
-        const reply = data.output || data.text || data.message || 'تم استلام رسالتك بنجاح!';
+        const rawText = await res.text();
+        if (!res.ok) {
+          streamBotReply(`⚠️ خادم n8n رجّع خطأ (${res.status}): تأكد إن الـ Workflow مفعّل (Active) وإن Gemini API Key مربوط صح.`);
+          return;
+        }
+        let data;
+        try { data = JSON.parse(rawText); } catch { data = { output: rawText }; }
+        const reply = data.output || data.text || data.message || (Array.isArray(data) && data[0]?.output) || rawText || 'تم استلام رسالتك بنجاح!';
         streamBotReply(reply);
       } catch (err) {
-        streamBotReply('تعذّر الاتصال بخادم n8n حالياً — تأكد من تفعيل الـ Workflow و Allowed Origins = *.');
+        streamBotReply('⚠️ تعذّر الاتصال بخادم n8n (CORS أو رابط غير مفعّل) — تأكد في n8n إن: Mode = Embedded Chat، و Allowed Origins = *، وزر Active شغّال.');
       }
       return;
     }
@@ -796,23 +907,21 @@
     setTimeout(() => {
       const t = text.trim().toLowerCase();
       if (/^(hi|hello|hey|yo|sup|good morning|good evening)\b/.test(t)) {
-        streamBotReply('Hey there! 👋 I’m Nano, the flying AI assistant created by the Agentic Mind team! ✨\nI’m here to help IT & Business students explore AI automation and see how AI empowers humans without replacing them. Ask me anything!');
+        streamBotReply('Hey! 👋 I’m Nano — a flying, 100% Local AI companion prototype by Agentic Mind! ✨\nYour data stays private on your own device (never sent to external companies), and I learn directly from you. Ask me anything or tap 🎤 to talk!');
       } else if (t.includes('مرحب') || t.includes('هلا') || t.includes('السلام') || t.includes('اهلا') || t.includes('أهلا') || t.includes('كيفك') || t.includes('يسعد')) {
-        streamBotReply('أهلاً وسهلاً فيك! 👋✨ أنا نانو، المساعد الذكي الطائر من فريق Agentic Mind.\nمهمتي أساعد طلاب تكنولوجيا المعلومات والأعمال يكتشفوا قوة الأتمتة والذكاء الاصطناعي. عن شو حابب نحكي اليوم؟');
-      } else if (t.includes('مين') || t.includes('عرّف') || t.includes('عرفني') || t.includes('who are you') || t.includes('نانو')) {
-        streamBotReply('أهلاً بك! أنا نانو (Nano) 🤖✨ — مساعد ذكاء اصطناعي طائر ومطوّر من قِبل فريق Agentic Mind لطلاب الجامعة!\nفكرتي إني أكون شريكك الذكي: أشتغل معك في الأتمتة، أفكار المشاريع، وتنظيم المهام بين تخصصي الـ IT والأعمال، مع بقاء القرار والإبداع دايماً بيد الإنسان.');
-      } else if (t.includes('it') || t.includes('تكنولوجيا') || t.includes('برمج') || t.includes('تقني')) {
-        streamBotReply('لطلاب تكنولوجيا المعلومات (IT) 💻:\nبقدر أساعدكم في ربط الـ APIs، بناء Workflows أتمتة ذكية عبر n8n، تصميم هيكلية وكلاء الذكاء الاصطناعي (AI Agents)، وتقليل الشغل الروتيني عشان تركزوا على الهندسة والابتكار!');
-      } else if (t.includes('أعمال') || t.includes('اعمال') || t.includes('business') || t.includes('تسويق') || t.includes('إدارة')) {
-        streamBotReply('لطلاب إدارة الأعمال (Business) 💼:\nبقدر أساعدكم في أتمتة متابعة العملاء، تنظيم الجداول والتقارير، تحليل أفكار المشاريع الناشئة، وتوفير ساعات طويلة من العمل الإداري المتكرر بأقل تكلفة ممكنة!');
-      } else if (t.includes('يستبدل') || t.includes('بشر') || t.includes('إنسان') || t.includes('انسان') || t.includes('human')) {
-        streamBotReply('سؤال رائع! 🤝 هذه هي رسالة فريق Agentic Mind الأساسية:\nالذكاء الاصطناعي مش موجود عشان يستبدل الإنسان — أنا بقدر أسرّع 80% من المهام المتكررة، لكن الإبداع، المسؤولية، والقرارات الحساسة (Human-in-the-Loop) دايماً بتحتاج العقل البشري!');
-      } else if (t.includes('فكرة') || t.includes('مشروع') || t.includes('أتمتة') || t.includes('اتمتة')) {
-        streamBotReply('فكرة مشروع تجمع IT والأعمال 🚀:\nتقدروا تبنوا "فريق تشغيل ذكي لمشروع طلابي" — وكيل يرد على الطلاب والعملاء، وكيل ينظّم البيانات في Google Sheets، ووكيل يحوّل القرارات المهمة لقائد الفريق البشري للموافقة. سريع، عملي، ويوفر وقت وجهد ضخم!');
+        streamBotReply('أهلاً وسهلاً! 👋✨ أنا نانو، الذكاء الاصطناعي المحلي الطائر من فريق Agentic Mind.\nتقدر تكتبلي أو تضغط زر المايك 🎤 وتحكي معي مباشرة — اسألني عن فكرتي، الخصوصية، أو كيف بتعلّم منك!');
+      } else if (t.includes('مين') || t.includes('فكرتك') || t.includes('عرّف') || t.includes('عرفني') || t.includes('نانو')) {
+        streamBotReply('أهلاً بك! أنا نانو (Nano) 🛸✨ — مشروع طموح لذكاء اصطناعي محلي طائر من فريق Agentic Mind!\nالنسخة المعروضة اليوم هي نموذج أولي تفاعلي (Prototype) يورّيكم كيف رح يكون عندك مساعد ذكي خاص فيك: محلي 100%، يحمي خصوصيتك، وبيرافقك ويساعدك بكثير أمور!');
+      } else if (t.includes('محلي') || t.includes('خصوصي') || t.includes('شركات') || t.includes('بيانات') || t.includes('local') || t.includes('privacy')) {
+        streamBotReply('ميزة نانو الأقوى هي إنه **ذكاء اصطناعي محلي (Local AI)** 🔒:\nيعني يعمل على جهازك بدون إرسال بياناتك أو أسرارك لخوادم الشركات الخارجية! هذه نقطة قوة ضخمة لطلاب الـ IT في أمن المعلومات، وللشركات والجهات الحساسة اللي بتدور على خصوصية 100%.');
+      } else if (t.includes('تتعل') || t.includes('ترب') || t.includes('إيد') || t.includes('ايد') || t.includes('learn')) {
+        streamBotReply('فكرة نانو إنك **بتربّيه على إيديك** 🧠✨:\nكل ما تحكي معه وتشتغل معه، بيتعلّم أسلوبك، اهتماماتك، وطريقة شغلك بشكل خاص فيك لوحدك — زي مساعد شخصي مخصّص إلك، بس بدون ما يشارك أي معلومة برا جهازك!');
+      } else if (t.includes('رؤية') || t.includes('مستقبل') || t.includes('دول') || t.includes('شركة') || t.includes('business') || t.includes('it')) {
+        streamBotReply('الرؤية المستقبلية لـ نانو (تجمع الـ IT والأعمال) 🚀:\n• **تقنياً (IT):** تطوير درون ذكي حقيقي مدمج بداخله شريحة ذكاء اصطناعي محلي (Edge AI) تعمل أوفلاين بالكامل.\n• **تجارياً (Business):** بناء شركة ناشئة توفّر مساعدين ذكيين آمنين ومحلّيين للأفراد، الشركات، وحتى المؤسسات والدول التي تمنع خروج بياناتها للسحابة!');
       } else {
-        streamBotReply('أهلاً بك! أنا نانو من فريق Agentic Mind 🤖✨\nاسألني عن نفسي، أو كيف أساعد طلاب الـ IT والأعمال، أو عن دور العنصر البشري مع الذكاء الاصطناعي — (ولتشغيل الردود الحية على أي سؤال، اربط رابط n8n Cloud من زر "⚙️ ربط n8n" بالأعلى!).');
+        streamBotReply('أهلاً بك! أنا نانو من فريق Agentic Mind 🛸✨\nجرّب تسألني عن: الخصوصية والذكاء المحلي، كيف بتعلّم منك، أو الرؤية المستقبلية للشركة — (ولتشغيل الردود الحية الكاملة، اربط رابط n8n Cloud من زر "⚙️ ربط n8n" بالأعلى).');
       }
-    }, 650);
+    }, 600);
   }
 
   chatForm.addEventListener('submit', (e) => {
