@@ -3,757 +3,877 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Agentic Mind — فريق التشغيل الذكي (IT & Business)</title>
+  <title>Agentic Mind — المساعد الذكي التفاعلي</title>
   <link rel="icon" type="image/png" href="logo.png" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #0b1020;
-      --panel: #131a2e;
-      --panel-2: #1a2340;
-      --border: rgba(255, 255, 255, 0.08);
-      --text: #eef2ff;
+      --bg: #070d1a;
+      --surface: #0e192d;
+      --surface-2: #15243f;
+      --border: rgba(255, 255, 255, 0.09);
+      --text: #f1f5f9;
       --muted: #94a3b8;
-      --primary: #6366f1;
-      --primary-2: #8b5cf6;
-      --green: #10b981;
-      --amber: #f59e0b;
-      --red: #ef4444;
-      --cyan: #06b6d4;
+      --cyan: #38bdf8;
+      --indigo: #818cf8;
+      --purple: #c084fc;
+      --gemini-grad: linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #c084fc 100%);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
 
     body {
       font-family: 'Cairo', system-ui, -apple-system, sans-serif;
-      background: radial-gradient(circle at top right, #1e1b4b 0%, var(--bg) 45%, #070b14 100%);
+      background: radial-gradient(circle at 50% -10%, #16294a 0%, var(--bg) 55%, #040812 100%);
       color: var(--text);
-      min-height: 100vh;
       display: flex;
       flex-direction: column;
+      overflow-x: hidden;
     }
 
-    /* Header */
+    /* Animated subtle starfield */
+    #stars {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.55;
+    }
+
+    /* Top Bar (Gemini-style clean header) */
     header {
+      position: sticky;
+      top: 0;
+      z-index: 30;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 14px 24px;
-      background: rgba(19, 26, 46, 0.85);
-      backdrop-filter: blur(12px);
+      padding: 12px 24px;
+      background: rgba(7, 13, 26, 0.72);
+      backdrop-filter: blur(16px);
       border-bottom: 1px solid var(--border);
-      gap: 12px;
-      flex-wrap: wrap;
     }
 
     .brand {
       display: flex;
       align-items: center;
-      gap: 12px;
-    }
-
-    .logo-box {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      background: #0d2240;
-      display: grid;
-      place-items: center;
-      border: 2px solid rgba(255, 255, 255, 0.2);
-      box-shadow: 0 6px 20px rgba(13, 34, 64, 0.55);
-      overflow: hidden;
-    }
-
-    .logo-box img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .brand h1 {
-      font-size: 1.1rem;
-      font-weight: 800;
-      line-height: 1.2;
-    }
-
-    .brand p {
-      font-size: 0.78rem;
-      color: var(--muted);
-    }
-
-    .header-actions {
-      display: flex;
-      align-items: center;
       gap: 10px;
-      flex-wrap: wrap;
+      font-weight: 800;
+      font-size: 1.05rem;
+      letter-spacing: 0.4px;
     }
-
-    .mode-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
-      border-radius: 999px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      border: 1px solid var(--border);
-      background: var(--panel-2);
-    }
-
-    .dot {
-      width: 8px;
-      height: 8px;
+    .brand img {
+      width: 38px;
+      height: 38px;
       border-radius: 50%;
-      background: var(--amber);
+      border: 2px solid rgba(56, 189, 248, 0.4);
+      box-shadow: 0 0 14px rgba(56, 189, 248, 0.3);
     }
-    .dot.live { background: var(--green); box-shadow: 0 0 8px var(--green); }
-
-    .btn {
-      font-family: inherit;
-      border: 1px solid var(--border);
-      background: var(--panel-2);
-      color: var(--text);
-      padding: 7px 14px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-size: 0.82rem;
-      font-weight: 600;
-      transition: 0.2s;
-    }
-    .btn:hover { background: #243054; border-color: rgba(255,255,255,0.2); }
-    .btn-primary {
-      background: linear-gradient(135deg, var(--primary), var(--primary-2));
-      border: none;
-    }
-    .btn-primary:hover { opacity: 0.92; }
-
-    /* Main Grid */
-    main {
-      flex: 1;
-      display: grid;
-      grid-template-columns: 1.15fr 1fr;
-      gap: 18px;
-      padding: 18px 24px;
-      max-width: 1440px;
-      width: 100%;
-      margin: 0 auto;
-    }
-
-    main.chat-only {
-      grid-template-columns: 1fr;
-      max-width: 820px;
-    }
-    main.chat-only .ops-panel { display: none; }
-
-    @media (max-width: 960px) {
-      main { grid-template-columns: 1fr; padding: 12px; }
-    }
-
-    /* Panels */
-    .card {
-      background: rgba(19, 26, 46, 0.85);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
-    }
-
-    .card-header {
-      padding: 14px 18px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: rgba(255, 255, 255, 0.02);
-    }
-
-    .card-header h2 {
-      font-size: 0.98rem;
+    .brand-tag {
+      font-size: 0.72rem;
+      padding: 2px 9px;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.14);
+      color: var(--cyan);
       font-weight: 700;
+    }
+
+    .header-btns {
       display: flex;
       align-items: center;
       gap: 8px;
     }
 
-    /* Chat Area */
-    .chat-panel { height: calc(100vh - 115px); min-height: 540px; }
+    .pill-btn {
+      font-family: inherit;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 7px 14px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .pill-btn:hover { background: rgba(56, 189, 248, 0.15); border-color: rgba(56, 189, 248, 0.4); }
 
-    .messages {
+    /* Main Gemini-style Workspace */
+    .app-container {
+      position: relative;
+      z-index: 2;
       flex: 1;
-      padding: 18px;
-      overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      max-width: 880px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 16px 18px 20px;
+      min-height: 0;
     }
 
-    .msg {
-      max-width: 86%;
-      padding: 12px 15px;
-      border-radius: 16px;
-      font-size: 0.92rem;
-      line-height: 1.65;
-      white-space: pre-line;
-      animation: fadeUp 0.2s ease;
+    /* Mascot Stage (Always alive at top of chat) */
+    .mascot-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 0 6px;
+      position: relative;
+      transition: all 0.4s ease;
     }
 
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(6px); }
+    .mascot-wrap {
+      position: relative;
+      width: 190px;
+      height: 165px;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+    }
+
+    .mascot-glow {
+      position: absolute;
+      width: 135px;
+      height: 135px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(250, 204, 21, 0.34), rgba(45, 212, 191, 0.18), transparent 72%);
+      filter: blur(16px);
+      animation: glowPulse 3.2s ease-in-out infinite;
+    }
+
+    .mascot-shadow {
+      position: absolute;
+      bottom: 4px;
+      width: 78px;
+      height: 12px;
+      border-radius: 50%;
+      background: rgba(45, 212, 191, 0.3);
+      filter: blur(5px);
+      animation: shadowFloat 3.2s ease-in-out infinite;
+    }
+
+    .bot-svg {
+      width: 185px;
+      height: 158px;
+      position: relative;
+      z-index: 2;
+      animation: hoverFly 3.2s ease-in-out infinite;
+      transition: transform 0.3s ease;
+      filter: drop-shadow(0 14px 24px rgba(0, 0, 0, 0.5));
+    }
+
+    /* Flying & Rotor Animations (Nano Drone) */
+    @keyframes hoverFly {
+      0%, 100% { transform: translateY(0px) rotate(-2deg); }
+      50% { transform: translateY(-12px) rotate(2deg); }
+    }
+    @keyframes shadowFloat {
+      0%, 100% { transform: scale(1); opacity: 0.45; }
+      50% { transform: scale(0.72); opacity: 0.22; }
+    }
+    @keyframes glowPulse {
+      0%, 100% { transform: scale(0.95); opacity: 0.65; }
+      50% { transform: scale(1.15); opacity: 1; }
+    }
+
+    .rotor-blade {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: spinBlade 0.28s linear infinite;
+    }
+    @keyframes spinBlade {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Eyes blink */
+    .eye {
+      transform-origin: center;
+      transform-box: fill-box;
+      animation: blinkEye 4.2s infinite;
+      transition: transform 0.25s ease;
+    }
+    @keyframes blinkEye {
+      0%, 92%, 100% { transform: scaleY(1); }
+      95% { transform: scaleY(0.1); }
+    }
+
+    /* Mascot States */
+    .mascot-wrap.state-listening .bot-svg {
+      animation: hoverFly 2.1s ease-in-out infinite;
+      transform: scale(1.05);
+    }
+    .mascot-wrap.state-listening .eye {
+      transform: translateY(2.5px) scale(1.1);
+    }
+
+    .mascot-wrap.state-thinking .bot-svg {
+      animation: thinkBob 0.8s ease-in-out infinite;
+    }
+    .mascot-wrap.state-thinking .rotor-blade { animation-duration: 0.12s; }
+    .mascot-wrap.state-thinking .mascot-glow {
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.52), rgba(250, 204, 21, 0.25), transparent 72%);
+    }
+    @keyframes thinkBob {
+      0%, 100% { transform: translateY(-4px) rotate(-4deg); }
+      50% { transform: translateY(-14px) rotate(4deg); }
+    }
+
+    .mascot-wrap.state-talking .bot-svg {
+      animation: talkBounce 0.44s ease-in-out infinite;
+    }
+    .mascot-wrap.state-talking .rotor-blade { animation-duration: 0.16s; }
+    @keyframes talkBounce {
+      0%, 100% { transform: translateY(-2px) scale(1); }
+      50% { transform: translateY(-8px) scale(1.03); }
+    }
+
+    .mouth-idle { opacity: 1; transition: opacity 0.15s; }
+    .mouth-talk { opacity: 0; transform-box: fill-box; transform-origin: center; }
+    .mascot-wrap.state-talking .mouth-idle { opacity: 0; }
+    .mascot-wrap.state-talking .mouth-talk {
+      opacity: 1;
+      animation: mouthSpeak 0.2s ease-in-out infinite alternate;
+    }
+    @keyframes mouthSpeak {
+      0% { transform: scaleY(0.35) scaleX(0.92); }
+      50% { transform: scaleY(1.15) scaleX(1.05); }
+      100% { transform: scaleY(0.65) scaleX(0.96); }
+    }
+
+    .mascot-status-pill {
+      margin-top: 2px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--cyan);
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      padding: 3px 13px;
+      border-radius: 999px;
+      transition: 0.25s;
+    }
+
+    /* Gemini Greeting */
+    .welcome-hero {
+      text-align: center;
+      margin: 8px 0 18px;
+      transition: all 0.35s ease;
+    }
+    .welcome-hero.compact { display: none; }
+    .welcome-hero h1 {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 900;
+      background: var(--gemini-grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 4px;
+    }
+    .welcome-hero p {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    /* Chat Stream (Gemini-style clean messages) */
+    .chat-stream {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px 4px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      scroll-behavior: smooth;
+    }
+
+    .msg-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      animation: fadeSlide 0.28s ease;
+    }
+    .msg-row.user { justify-content: flex-end; }
+
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
-    .msg.bot {
-      align-self: flex-start;
-      background: var(--panel-2);
+    .msg-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      border: 1.5px solid rgba(56, 189, 248, 0.45);
+      background: var(--surface-2);
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+    }
+    .msg-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+    .bubble {
+      max-width: 82%;
+      padding: 13px 18px;
+      border-radius: 20px;
+      font-size: 0.96rem;
+      line-height: 1.75;
+      white-space: pre-line;
+    }
+
+    .msg-row.bot .bubble {
+      background: rgba(21, 36, 63, 0.72);
       border: 1px solid var(--border);
-      border-top-right-radius: 4px;
+      border-top-right-radius: 6px;
     }
 
-    .msg.user {
-      align-self: flex-end;
-      background: linear-gradient(135deg, var(--primary), var(--primary-2));
-      border-top-left-radius: 4px;
+    .msg-row.user .bubble {
+      background: linear-gradient(135deg, #2563eb, #6366f1);
+      color: #fff;
+      border-top-left-radius: 6px;
+      box-shadow: 0 6px 22px rgba(37, 99, 235, 0.28);
     }
 
-    .msg-tag {
-      display: inline-block;
-      font-size: 0.7rem;
-      font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 999px;
-      margin-bottom: 6px;
-      background: rgba(99, 102, 241, 0.2);
-      color: #a5b4fc;
-    }
-    .msg-tag.human { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
-    .msg-tag.it { background: rgba(6, 182, 212, 0.2); color: #67e8f9; }
-    .msg-tag.warn { background: rgba(245, 158, 11, 0.2); color: #fcd34d; }
-
-    .quick-chips {
+    /* Suggestion Chips */
+    .suggestions {
       display: flex;
       gap: 8px;
-      padding: 10px 16px;
-      overflow-x: auto;
-      border-top: 1px solid var(--border);
-      background: rgba(255, 255, 255, 0.015);
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 12px;
     }
-
     .chip {
       font-family: inherit;
-      white-space: nowrap;
-      font-size: 0.78rem;
-      padding: 6px 12px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      color: #cbd5e1;
+      padding: 8px 15px;
       border-radius: 999px;
-      border: 1px solid rgba(99, 102, 241, 0.4);
-      background: rgba(99, 102, 241, 0.12);
-      color: #c7d2fe;
+      font-size: 0.83rem;
+      font-weight: 600;
       cursor: pointer;
-      transition: 0.2s;
+      transition: 0.22s;
     }
-    .chip:hover { background: rgba(99, 102, 241, 0.28); color: #fff; }
+    .chip:hover {
+      background: rgba(56, 189, 248, 0.14);
+      border-color: rgba(56, 189, 248, 0.45);
+      color: #fff;
+      transform: translateY(-2px);
+    }
 
-    .chat-input-bar {
+    /* Gemini-style Floating Input Bar */
+    .input-dock {
+      position: sticky;
+      bottom: 0;
+      padding-top: 6px;
+      background: linear-gradient(to top, var(--bg) 70%, transparent);
+    }
+
+    .input-pill {
       display: flex;
+      align-items: center;
       gap: 10px;
-      padding: 12px 16px;
-      border-top: 1px solid var(--border);
-      background: rgba(11, 16, 32, 0.6);
+      background: rgba(21, 36, 63, 0.9);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 999px;
+      padding: 8px 10px 8px 18px;
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
+      transition: border-color 0.25s, box-shadow 0.25s;
+    }
+    .input-pill:focus-within {
+      border-color: var(--cyan);
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15), 0 12px 35px rgba(0, 0, 0, 0.45);
     }
 
-    .chat-input-bar input {
+    .input-pill input {
       flex: 1;
       font-family: inherit;
-      background: var(--panel-2);
-      border: 1px solid var(--border);
+      background: transparent;
+      border: none;
       color: var(--text);
-      padding: 11px 14px;
-      border-radius: 12px;
-      font-size: 0.92rem;
+      font-size: 0.98rem;
       outline: none;
-    }
-    .chat-input-bar input:focus { border-color: var(--primary); }
-
-    /* Operations / Manager Panel */
-    .ops-panel {
-      height: calc(100vh - 115px);
-      min-height: 540px;
-      overflow-y: auto;
-      padding: 16px;
-      gap: 14px;
+      padding: 6px 8px;
     }
 
-    .kpi-grid {
+    .send-circle {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: none;
+      background: var(--gemini-grad);
+      color: #fff;
+      font-size: 1.15rem;
+      cursor: pointer;
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
+      place-items: center;
+      transition: transform 0.2s, opacity 0.2s;
+      flex-shrink: 0;
     }
+    .send-circle:hover { transform: scale(1.07); }
 
-    .kpi {
-      background: var(--panel-2);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 12px;
+    .disclaimer {
       text-align: center;
-    }
-    .kpi .val { font-size: 1.35rem; font-weight: 800; color: #fff; }
-    .kpi .lbl { font-size: 0.74rem; color: var(--muted); }
-
-    .approval-box {
-      background: rgba(245, 158, 11, 0.1);
-      border: 1px solid rgba(245, 158, 11, 0.45);
-      border-radius: 14px;
-      padding: 14px;
-      display: none;
-      flex-direction: column;
-      gap: 10px;
-      animation: fadeUp 0.25s ease;
-    }
-    .approval-box.active { display: flex; }
-    .approval-box h3 { font-size: 0.92rem; color: #fcd34d; }
-    .approval-box p { font-size: 0.84rem; color: var(--text); line-height: 1.5; }
-    .approval-actions { display: flex; gap: 8px; }
-    .btn-approve { background: var(--green); border: none; color: #052e16; font-weight: 800; flex: 1; }
-    .btn-reject { background: rgba(239, 68, 68, 0.2); border: 1px solid var(--red); color: #fca5a5; flex: 1; }
-
-    .section-title {
-      font-size: 0.85rem;
-      font-weight: 700;
+      font-size: 0.74rem;
       color: var(--muted);
+      margin-top: 8px;
+    }
+
+    /* Modals (Team & n8n Config) */
+    .modal-bg {
+      position: fixed; inset: 0;
+      background: rgba(4, 8, 18, 0.78);
+      backdrop-filter: blur(8px);
+      display: none; place-items: center;
+      z-index: 80; padding: 16px;
+    }
+    .modal-bg.open { display: grid; }
+    .modal {
+      background: var(--surface);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      border-radius: 22px;
+      max-width: 640px;
+      width: 100%;
+      padding: 24px;
+      max-height: 88vh;
+      overflow-y: auto;
+      animation: fadeSlide 0.25s ease;
+    }
+    .modal-head {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-top: 4px;
+      margin-bottom: 16px;
     }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.8rem;
-      background: var(--panel-2);
-      border-radius: 12px;
-      overflow: hidden;
-    }
-    th, td {
-      padding: 9px 10px;
-      text-align: right;
-      border-bottom: 1px solid var(--border);
-    }
-    th { color: var(--muted); font-weight: 700; background: rgba(255,255,255,0.03); }
-
-    .badge {
-      padding: 2px 8px;
-      border-radius: 999px;
-      font-size: 0.72rem;
-      font-weight: 700;
-    }
-    .badge.ok { background: rgba(16,185,129,0.2); color: #6ee7b7; }
-    .badge.high { background: rgba(239,68,68,0.2); color: #fca5a5; }
-
-    /* Modal */
-    .modal-backdrop {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.65);
-      display: none; place-items: center;
-      z-index: 50; padding: 16px;
-    }
-    .modal-backdrop.open { display: grid; }
-    .modal {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      max-width: 500px;
-      width: 100%;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 12px;
     }
-    .modal label { font-size: 0.84rem; color: var(--muted); }
-    .modal input {
-      width: 100%;
-      font-family: inherit;
-      background: var(--panel-2);
+    .member-card {
+      background: var(--surface-2);
       border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      text-align: center;
+    }
+    .member-avatar {
+      width: 54px; height: 54px; border-radius: 50%;
+      margin: 0 auto 10px;
+      background: var(--gemini-grad);
+      display: grid; place-items: center;
+      font-weight: 900; font-size: 1.25rem;
+    }
+    .member-card h4 { font-size: 0.98rem; margin-bottom: 3px; }
+    .member-card span { font-size: 0.75rem; color: var(--cyan); font-weight: 700; display: block; margin-bottom: 6px; }
+    .member-card p { font-size: 0.8rem; color: var(--muted); }
+
+    .url-input {
+      width: 100%;
+      padding: 11px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--bg);
       color: var(--text);
-      padding: 10px 12px;
-      border-radius: 10px;
       direction: ltr;
+      font-family: monospace;
+      margin: 10px 0 16px;
     }
   </style>
 </head>
 <body>
 
+<canvas id="stars"></canvas>
+
+<!-- الهيدر -->
 <header>
   <div class="brand">
-    <div class="logo-box" id="logoBox">
-      <img src="logo.png" alt="Agentic Mind Logo" />
-    </div>
-    <div>
-      <h1 id="companyTitle">Agentic Mind — فريق التشغيل الذكي</h1>
-      <p>فريق أتمتة يجمع تكنولوجيا المعلومات (IT) وإدارة الأعمال (Business) + إشراف بشري</p>
-    </div>
+    <img src="logo.png" alt="Agentic Mind" />
+    <span>AGENTIC MIND</span>
+    <span class="brand-tag">AI Live</span>
   </div>
-
-  <div class="header-actions">
-    <div class="mode-pill">
-      <span class="dot" id="modeDot"></span>
-      <span id="modeLabel">وضع التجربة التفاعلي (Demo)</span>
-    </div>
-    <button class="btn" id="toggleOpsBtn">👁️ إخفاء/إظهار لوحة المدير</button>
-    <button class="btn btn-primary" id="settingsBtn">⚙️ ربط n8n Cloud</button>
+  <div class="header-btns">
+    <button class="pill-btn" id="openTeamBtn">👥 فريق العمل</button>
+    <button class="pill-btn" id="openConfigBtn">⚙️ ربط n8n</button>
   </div>
 </header>
 
-<main id="mainGrid">
-  <!-- واجهة المحادثة (العميل / الجمهور) -->
-  <section class="card chat-panel">
-    <div class="card-header">
-      <h2>💬 محادثة العملاء (فريق الـ AI)</h2>
-      <span style="font-size:0.76rem; color:var(--muted);">مبيعات • محاسبة • دعم IT</span>
+<!-- مساحة الشات الرئيسية بأسلوب Gemini + الروبوت الطائر -->
+<main class="app-container">
+
+  <!-- الروبوت الذكي الطائر والمتكلم -->
+  <div class="mascot-stage">
+    <div class="mascot-wrap state-idle" id="mascot" title="اضغط عليّ للترحيب!">
+      <div class="mascot-glow"></div>
+      <div class="mascot-shadow"></div>
+
+      <!-- شخصية نانو (Nano) الطائرة — درون أصفر بـ 4 مراوح وشاشة وجه تركوازية -->
+      <svg class="bot-svg" viewBox="0 0 260 210" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="nanoGold" cx="42%" cy="28%" r="68%">
+            <stop offset="0%" stop-color="#fde047" />
+            <stop offset="55%" stop-color="#eab308" />
+            <stop offset="100%" stop-color="#a16207" />
+          </radialGradient>
+          <radialGradient id="nanoScreen" cx="50%" cy="45%" r="60%">
+            <stop offset="0%" stop-color="#ccfbf1" />
+            <stop offset="55%" stop-color="#5eead4" />
+            <stop offset="100%" stop-color="#0d9488" />
+          </radialGradient>
+          <linearGradient id="ringMetal" x1="0" y1="0" x2="1" y2="1">
+            <stop stop-color="#334155" />
+            <stop offset="1" stop-color="#0f172a" />
+          </linearGradient>
+        </defs>
+
+        <!-- أذرع المراوح الجانبية والسفلية -->
+        <line x1="88" y1="98" x2="48" y2="96" stroke="#a16207" stroke-width="4" stroke-linecap="round"/>
+        <line x1="172" y1="98" x2="212" y2="86" stroke="#a16207" stroke-width="4" stroke-linecap="round"/>
+        <line x1="108" y1="112" x2="96" y2="148" stroke="#a16207" stroke-width="3.5" stroke-linecap="round"/>
+        <line x1="152" y1="112" x2="168" y2="144" stroke="#a16207" stroke-width="3.5" stroke-linecap="round"/>
+
+        <!-- المروحة اليسرى العلوية -->
+        <g transform="translate(42, 95) rotate(-14)">
+          <ellipse cx="0" cy="0" rx="34" ry="22" fill="rgba(45,212,191,0.12)" stroke="url(#ringMetal)" stroke-width="5.5"/>
+          <ellipse cx="0" cy="0" rx="34" ry="22" fill="none" stroke="#eab308" stroke-width="1.3" stroke-dasharray="14 10"/>
+          <g class="rotor-blade">
+            <ellipse cx="0" cy="0" rx="26" ry="4" fill="#facc15" opacity="0.8"/>
+            <ellipse cx="0" cy="0" rx="4" ry="16" fill="#facc15" opacity="0.8"/>
+          </g>
+          <circle cx="0" cy="0" r="4" fill="#1e293b"/>
+        </g>
+
+        <!-- المروحة اليمنى العلوية -->
+        <g transform="translate(218, 82) rotate(-18)">
+          <ellipse cx="0" cy="0" rx="34" ry="22" fill="rgba(45,212,191,0.12)" stroke="url(#ringMetal)" stroke-width="5.5"/>
+          <ellipse cx="0" cy="0" rx="34" ry="22" fill="none" stroke="#eab308" stroke-width="1.3" stroke-dasharray="14 10"/>
+          <g class="rotor-blade">
+            <ellipse cx="0" cy="0" rx="26" ry="4" fill="#facc15" opacity="0.8"/>
+            <ellipse cx="0" cy="0" rx="4" ry="16" fill="#facc15" opacity="0.8"/>
+          </g>
+          <circle cx="0" cy="0" r="4" fill="#1e293b"/>
+        </g>
+
+        <!-- المروحة السفلية اليسرى -->
+        <g transform="translate(94, 158) rotate(16)">
+          <ellipse cx="0" cy="0" rx="14" ry="30" fill="rgba(45,212,191,0.12)" stroke="url(#ringMetal)" stroke-width="5"/>
+          <g class="rotor-blade">
+            <ellipse cx="0" cy="0" rx="9" ry="22" fill="#facc15" opacity="0.65"/>
+          </g>
+          <circle cx="0" cy="0" r="3.5" fill="#1e293b"/>
+        </g>
+
+        <!-- المروحة السفلية اليمنى -->
+        <g transform="translate(172, 152) rotate(-26)">
+          <ellipse cx="0" cy="0" rx="14" ry="30" fill="rgba(45,212,191,0.12)" stroke="url(#ringMetal)" stroke-width="5"/>
+          <g class="rotor-blade">
+            <ellipse cx="0" cy="0" rx="9" ry="22" fill="#facc15" opacity="0.65"/>
+          </g>
+          <circle cx="0" cy="0" r="3.5" fill="#1e293b"/>
+        </g>
+
+        <!-- تاج/قبعة نانو العلوية -->
+        <path d="M114 38 L146 38 L140 48 L120 48 Z" fill="#eab308" stroke="#a16207" stroke-width="1.5"/>
+
+        <!-- جسم نانو الأصفر على شكل قبة -->
+        <path d="M80 105 C80 56, 102 44, 130 44 C158 44, 180 56, 180 105 C180 116, 170 120, 130 120 C90 120, 80 116, 80 105 Z"
+              fill="url(#nanoGold)" stroke="#ca8a04" stroke-width="2.2"/>
+
+        <!-- لمعة على القبة الصفراء -->
+        <path d="M98 62 C106 52, 120 49, 132 50" stroke="#fef9c3" stroke-width="3.5" stroke-linecap="round" opacity="0.7"/>
+
+        <!-- الجوهرة/الزر التركوازي في الجبهة -->
+        <circle cx="130" cy="57" r="5" fill="#14b8a6" stroke="#fef08a" stroke-width="1.5">
+          <animate attributeName="opacity" values="0.75;1;0.75" dur="2s" repeatCount="indefinite" />
+        </circle>
+
+        <!-- شاشة وجه نانو التركوازية -->
+        <rect x="96" y="68" width="68" height="42" rx="12" fill="url(#nanoScreen)" stroke="#0f766e" stroke-width="2.2"/>
+
+        <!-- حواجب لطيفة -->
+        <path d="M112 77 Q117 74 122 76" stroke="#0f172a" stroke-width="2" stroke-linecap="round" fill="none"/>
+        <path d="M138 76 Q143 74 148 77" stroke="#0f172a" stroke-width="2" stroke-linecap="round" fill="none"/>
+
+        <!-- العيون -->
+        <g class="eye">
+          <ellipse cx="117" cy="84" rx="4.2" ry="5.5" fill="#0f172a"/>
+          <circle cx="118.5" cy="82.3" r="1.5" fill="#ffffff"/>
+        </g>
+        <g class="eye">
+          <ellipse cx="143" cy="84" rx="4.2" ry="5.5" fill="#0f172a"/>
+          <circle cx="144.5" cy="82.3" r="1.5" fill="#ffffff"/>
+        </g>
+
+        <!-- ابتسامة نانو الكبيرة (Idle) -->
+        <path class="mouth-idle" d="M115 94 Q130 108 145 94 Q130 98 115 94 Z" fill="#ffffff" stroke="#0f172a" stroke-width="2" stroke-linejoin="round"/>
+
+        <!-- فم نانو المتحرك أثناء الكلام (Talking) -->
+        <path class="mouth-talk" d="M117 93 Q130 110 143 93 Q130 96 117 93 Z" fill="#0f172a" stroke="#0f172a" stroke-width="1.5"/>
+      </svg>
     </div>
 
-    <div class="messages" id="messages"></div>
+    <div class="mascot-status-pill" id="mascotStatus">✨ جاهز للاستماع إليك</div>
+  </div>
 
-    <div class="quick-chips">
-      <button class="chip" data-msg="شو خدماتكم والأسعار؟">💰 الخدمات والأسعار</button>
-      <button class="chip" data-msg="اسمي سيف، بدي أطلب تصميم موقع تعريفي بـ 50 دينار">🛒 طلب خدمة جديدة</button>
-      <button class="chip" data-msg="عندي مشكلة تقنية، رابط الدفع بالموقع ما بيفتح!">🛠️ إبلاغ عن عطل IT</button>
-      <button class="chip" data-msg="أنا طالب جامعة، ممكن خصم 30% على المتجر الإلكتروني؟">🏷️ طلب خصم (موافقة المدير)</button>
-    </div>
+  <!-- ترحيب Gemini -->
+  <div class="welcome-hero" id="welcomeHero">
+    <h1>أهلاً! أنا نانو — مساعد Agentic Mind</h1>
+    <p>اسألني أي شيء — فريق الذكاء الاصطناعي ينفّذ، والإنسان يقود القرار</p>
+  </div>
 
-    <form class="chat-input-bar" id="chatForm">
-      <input type="text" id="chatInput" placeholder="اكتب رسالتك لفريق الشركة الذكية..." autocomplete="off" required />
-      <button type="submit" class="btn btn-primary">إرسال ⬅️</button>
+  <!-- رسائل المحادثة -->
+  <div class="chat-stream" id="chatStream"></div>
+
+  <!-- أزرار سريعة -->
+  <div class="suggestions" id="suggestions">
+    <button class="chip" data-q="عرّفني عن نفسك وعن فريق Agentic Mind">✨ مين إنت يا نانو؟</button>
+    <button class="chip" data-q="كيف بتساعد طلاب تكنولوجيا المعلومات (IT)؟">💻 لطلاب الـ IT</button>
+    <button class="chip" data-q="كيف بتساعد طلاب إدارة الأعمال (Business)؟">💼 لطلاب الأعمال</button>
+    <button class="chip" data-q="هل الذكاء الاصطناعي رح يستبدل العنصر البشري؟">🤝 دور الإنسان والـ AI</button>
+    <button class="chip" data-q="اعطيني فكرة مشروع أتمتة يجمع IT والأعمال">🚀 فكرة مشروع ذكي</button>
+  </div>
+
+  <!-- شريط الإدخال السفلي بأسلوب Gemini -->
+  <div class="input-dock">
+    <form class="input-pill" id="chatForm">
+      <input type="text" id="chatInput" placeholder="تحدّث مع مساعد Agentic Mind..." autocomplete="off" required />
+      <button type="submit" class="send-circle" title="إرسال">➤</button>
     </form>
-  </section>
-
-  <!-- لوحة المدير البشري (العرض على الشاشة الكبيرة) -->
-  <section class="card ops-panel">
-    <div class="card-header" style="margin:-16px -16px 4px -16px;">
-      <h2>🧑‍💼 لوحة المدير البشري (Human-in-the-Loop)</h2>
-      <span style="font-size:0.75rem; color:var(--green);">● تحديث فوري</span>
-    </div>
-
-    <div class="kpi-grid">
-      <div class="kpi">
-        <div class="val" id="kpiRevenue">50 JOD</div>
-        <div class="lbl">إجمالي المبيعات (المحاسب)</div>
-      </div>
-      <div class="kpi">
-        <div class="val" id="kpiOrders">1</div>
-        <div class="lbl">الطلبات المسجلة</div>
-      </div>
-      <div class="kpi">
-        <div class="val" id="kpiTickets">1</div>
-        <div class="lbl">تذاكر الـ IT المفتوحة</div>
-      </div>
-    </div>
-
-    <!-- صندوق موافقة العنصر البشري -->
-    <div class="approval-box" id="approvalBox">
-      <h3>⚠️ قرار يحتاج موافقة المدير البشري (Human-in-the-Loop)</h3>
-      <p id="approvalText"></p>
-      <div class="approval-actions">
-        <button class="btn btn-approve" id="approveBtn">✅ موافقة واعتماد للعميل</button>
-        <button class="btn btn-reject" id="rejectBtn">❌ رفض واقتراح بديل</button>
-      </div>
-    </div>
-
-    <div class="section-title">
-      <span>📊 جدول المحاسبة والطلبات (Google Sheets — Orders)</span>
-    </div>
-    <table>
-      <thead>
-        <tr>
-          <th>العميل</th>
-          <th>الخدمة</th>
-          <th>المبلغ</th>
-          <th>الحالة</th>
-        </tr>
-      </thead>
-      <tbody id="ordersBody">
-        <tr>
-          <td>أحمد (مثال)</td>
-          <td>تصميم موقع تعريفي</td>
-          <td>50 JOD</td>
-          <td><span class="badge ok">Confirmed</span></td>
-        </tr>
-      </tbody>
-    </table>
-
-    <div class="section-title">
-      <span>🛠️ تذاكر الدعم التقني (Google Sheets — IT_Tickets)</span>
-    </div>
-    <table>
-      <thead>
-        <tr>
-          <th>العميل</th>
-          <th>ملخص المشكلة</th>
-          <th>الأولوية</th>
-        </tr>
-      </thead>
-      <tbody id="ticketsBody">
-        <tr>
-          <td>سارة (مثال)</td>
-          <td>رابط صفحة الدفع لا يفتح</td>
-          <td><span class="badge high">High</span></td>
-        </tr>
-      </tbody>
-    </table>
-  </section>
+    <div class="disclaimer" id="connectionNote">Agentic Mind • مشروع أتمتة يجمع تخصصي تكنولوجيا المعلومات (IT) والأعمال (Business)</div>
+  </div>
 </main>
 
-<!-- نافذة إعدادات الربط مع n8n Cloud -->
-<div class="modal-backdrop" id="settingsModal">
+<!-- نافذة فريق العمل -->
+<div class="modal-bg" id="teamModal">
   <div class="modal">
-    <h3 style="font-size:1.05rem;">⚙️ ربط الواجهة مع n8n Cloud</h3>
-    <p style="font-size:0.82rem; color:var(--muted); line-height:1.5;">
-      الصق رابط الـ <strong>Chat Trigger Webhook URL</strong> من حسابك في n8n Cloud لتفعيل الربط الحقيقي، أو اتركه فارغاً للبقاء في وضع التجربة (Demo Mode).
+    <div class="modal-head">
+      <h3>👥 فريق عمل Agentic Mind</h3>
+      <button class="pill-btn" id="closeTeamBtn">✕ إغلاق</button>
+    </div>
+    <div class="team-grid">
+      <div class="member-card">
+        <div class="member-avatar">س</div>
+        <h4>سيف</h4>
+        <span>AI & Automation • IT</span>
+        <p>بناء وكلاء الذكاء الاصطناعي والربط مع n8n Cloud.</p>
+      </div>
+      <div class="member-card">
+        <div class="member-avatar">ع</div>
+        <h4>عضو الفريق 2</h4>
+        <span>Business Strategy • Business</span>
+        <p>نموذج العمل، التسعير، وتجربة العملاء.</p>
+      </div>
+      <div class="member-card">
+        <div class="member-avatar">م</div>
+        <h4>عضو الفريق 3</h4>
+        <span>Systems & Web • IT</span>
+        <p>تطوير الواجهة التفاعلية والربط السحابي.</p>
+      </div>
+      <div class="member-card">
+        <div class="member-avatar">ر</div>
+        <h4>عضو الفريق 4</h4>
+        <span>Operations & Pitch • Business</span>
+        <p>إدارة العمليات، الهوية البصرية، والعرض التقديمي.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- نافذة ربط n8n Cloud -->
+<div class="modal-bg" id="configModal">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-head">
+      <h3>⚙️ ربط المحادثة بـ n8n Cloud</h3>
+      <button class="pill-btn" id="closeConfigBtn">✕</button>
+    </div>
+    <p style="font-size:0.85rem; color:var(--muted);">
+      الصق رابط <strong>Chat Trigger URL</strong> من حسابك في n8n Cloud عشان الشات والروبوت يتفاعلوا مباشرة مع الـ Workflow الخاص بك:
     </p>
-    <label for="n8nUrlInput">رابط n8n Chat URL:</label>
-    <input type="url" id="n8nUrlInput" placeholder="https://your-name.app.n8n.cloud/webhook/mini-ai-company-chat/chat" />
-    <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:6px;">
-      <button class="btn" id="closeModalBtn">إلغاء</button>
-      <button class="btn btn-primary" id="saveSettingsBtn">حفظ وتفعيل</button>
+    <input type="url" id="n8nUrlInput" class="url-input" placeholder="https://your-name.app.n8n.cloud/webhook/mini-ai-company-chat/chat" />
+    <div style="display:flex; justify-content:flex-end; gap:8px;">
+      <button class="pill-btn" id="saveConfigBtn" style="background:var(--gemini-grad); border:none;">حفظ وتفعيل</button>
     </div>
   </div>
 </div>
 
 <script>
-  // ====== الإعدادات الأساسية ======
-  let N8N_CHAT_URL = localStorage.getItem('n8n_chat_url') || '';
-  const SESSION_ID = 'session-' + Math.random().toString(36).slice(2, 10);
+  // ====== ضع رابط n8n Cloud هنا قبل الرفع على Render ======
+  const DEFAULT_N8N_URL = '';
+  let n8nUrl = localStorage.getItem('agentic_n8n_url') || DEFAULT_N8N_URL;
+  const sessionId = 'am-' + Math.random().toString(36).slice(2, 10);
 
-  let revenue = 50;
-  let ordersCount = 1;
-  let ticketsCount = 1;
-  let pendingApproval = null;
-
-  const messagesEl = document.getElementById('messages');
+  const mascot = document.getElementById('mascot');
+  const mascotStatus = document.getElementById('mascotStatus');
+  const chatStream = document.getElementById('chatStream');
+  const welcomeHero = document.getElementById('welcomeHero');
   const chatForm = document.getElementById('chatForm');
   const chatInput = document.getElementById('chatInput');
-  const ordersBody = document.getElementById('ordersBody');
-  const ticketsBody = document.getElementById('ticketsBody');
-  const approvalBox = document.getElementById('approvalBox');
-  const approvalText = document.getElementById('approvalText');
-  const modeDot = document.getElementById('modeDot');
-  const modeLabel = document.getElementById('modeLabel');
 
-  function updateModeUI() {
-    if (N8N_CHAT_URL) {
-      modeDot.classList.add('live');
-      modeLabel.textContent = 'متصل مباشرة بـ n8n Cloud (Live)';
+  function setMascotState(state, label) {
+    mascot.classList.remove('state-idle', 'state-listening', 'state-thinking', 'state-talking');
+    mascot.classList.add('state-' + state);
+    mascotStatus.textContent = label;
+  }
+
+  // الروبوت ينتبه لما المستخدم يبدأ يكتب
+  chatInput.addEventListener('input', () => {
+    if (mascot.classList.contains('state-talking') || mascot.classList.contains('state-thinking')) return;
+    if (chatInput.value.trim().length > 0) {
+      setMascotState('listening', '👂 أسمعك... اكتب رسالتك');
     } else {
-      modeDot.classList.remove('live');
-      modeLabel.textContent = 'وضع التجربة التفاعلي (Demo)';
+      setMascotState('idle', '✨ جاهز للاستماع إليك');
     }
+  });
+
+  // تفاعل لطيف عند الضغط على الروبوت
+  mascot.addEventListener('click', () => {
+    if (mascot.classList.contains('state-talking')) return;
+    streamBotReply('أهلاً بك! 👋 أنا نانو، الذكاء الاصطناعي الطائر من فريق Agentic Mind ✨\nموجود هنا لأساعد طلاب تكنولوجيا المعلومات والأعمال بأفكار الأتمتة والمشاريع الذكية — اسألني أي شيء!');
+  });
+
+  function addUserBubble(text) {
+    welcomeHero.classList.add('compact');
+    const row = document.createElement('div');
+    row.className = 'msg-row user';
+    row.innerHTML = `<div class="bubble"></div>`;
+    row.querySelector('.bubble').textContent = text;
+    chatStream.appendChild(row);
+    chatStream.scrollTop = chatStream.scrollHeight;
   }
 
-  function addMessage(text, sender = 'bot', tagText = '', tagType = '') {
-    const div = document.createElement('div');
-    div.className = `msg ${sender}`;
-    if (tagText) {
-      const tag = document.createElement('div');
-      tag.className = `msg-tag ${tagType}`;
-      tag.textContent = tagText;
-      div.appendChild(tag);
-      div.appendChild(document.createElement('br'));
-    }
-    const span = document.createElement('span');
-    span.textContent = text;
-    div.appendChild(span);
-    messagesEl.appendChild(div);
-    messagesEl.scrollTop = messagesEl.scrollHeight;
+  // كتابة الرد تدريجياً مثل Gemini مع تحريك فم الروبوت!
+  function streamBotReply(fullText) {
+    welcomeHero.classList.add('compact');
+    setMascotState('talking', '🗣️ يتحدث معك الآن...');
+
+    const row = document.createElement('div');
+    row.className = 'msg-row bot';
+    row.innerHTML = `
+      <div class="msg-avatar"><img src="logo.png" alt="AI" /></div>
+      <div class="bubble"></div>
+    `;
+    const bubble = row.querySelector('.bubble');
+    chatStream.appendChild(row);
+
+    let i = 0;
+    const speed = 18; // سرعة الكتابة بالمللي ثانية
+    const timer = setInterval(() => {
+      bubble.textContent += fullText[i];
+      i++;
+      chatStream.scrollTop = chatStream.scrollHeight;
+      if (i >= fullText.length) {
+        clearInterval(timer);
+        setMascotState('idle', '✨ جاهز لطلبك التالي');
+      }
+    }, speed);
   }
 
-  function updateKPIs() {
-    document.getElementById('kpiRevenue').textContent = `${revenue} JOD`;
-    document.getElementById('kpiOrders').textContent = ordersCount;
-    document.getElementById('kpiTickets').textContent = ticketsCount;
-  }
-
-  // رسالة الترحيب الأولى
-  addMessage(
-    "أهلاً بك في Agentic Mind! 👋 أنا المساعد الذكي لفريق شركتنا.\nبقدر أساعدك في:\n1️⃣ الاستفسار عن الخدمات والأسعار وطلب خدمة (المبيعات والمحاسبة)\n2️⃣ الإبلاغ عن أي مشكلة تقنية (قسم الـ IT)\n3️⃣ طلبات الخصم والاستثناءات (تتحول تلقائياً للمدير البشري!)\n\nجرّب أي زر سريع بالأسفل أو اكتب رسالتك مباشرة:",
-    'bot',
-    '🤖 منسّق فريق Agentic Mind'
-  );
-  updateModeUI();
-
-  // إرسال الرسالة
-  async function handleSend(text) {
+  async function handleUserMessage(text) {
     if (!text.trim()) return;
-    addMessage(text, 'user');
+    addUserBubble(text);
     chatInput.value = '';
+    setMascotState('thinking', '⚡ يفكّر ويتواصل مع فريق الـ AI...');
 
-    // 1) إذا مربوط بـ n8n Cloud حقيقي
-    if (N8N_CHAT_URL) {
-      const loadingId = 'loading-' + Date.now();
-      const loadingDiv = document.createElement('div');
-      loadingDiv.id = loadingId;
-      loadingDiv.className = 'msg bot';
-      loadingDiv.textContent = '⏳ فريق الـ AI يعالج طلبك في n8n Cloud...';
-      messagesEl.appendChild(loadingDiv);
-      messagesEl.scrollTop = messagesEl.scrollHeight;
-
+    if (n8nUrl) {
       try {
-        const res = await fetch(N8N_CHAT_URL, {
+        const res = await fetch(n8nUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action: 'sendMessage',
-            sessionId: SESSION_ID,
-            chatInput: text
-          })
+          body: JSON.stringify({ action: 'sendMessage', sessionId, chatInput: text })
         });
         const data = await res.json();
-        document.getElementById(loadingId)?.remove();
-        const reply = data.output || data.text || data.message || JSON.stringify(data);
-        addMessage(reply, 'bot', '⚡ رد مباشر من n8n Cloud');
+        const reply = data.output || data.text || data.message || 'تم استلام رسالتك بنجاح!';
+        streamBotReply(reply);
       } catch (err) {
-        document.getElementById(loadingId)?.remove();
-        addMessage('تعذّر الاتصال برابط n8n Cloud (تأكد من تفعيل Workflow و Allowed Origins = *). يمكنك العودة لوضع Demo من الإعدادات.', 'bot', '⚠️ خطأ اتصال', 'warn');
+        streamBotReply('تعذّر الاتصال بخادم n8n حالياً — تأكد من تفعيل الـ Workflow و Allowed Origins = *.');
       }
       return;
     }
 
-    // 2) وضع التجربة التفاعلي (Demo Simulation)
-    setTimeout(() => runDemoAgent(text), 450);
+    // رد تفاعلي فوري في حال لم يتم ربط رابط n8n بعد
+    setTimeout(() => {
+      const t = text.trim().toLowerCase();
+      if (/^(hi|hello|hey|yo|sup|good morning|good evening)\b/.test(t)) {
+        streamBotReply('Hey there! 👋 I’m Nano, the flying AI assistant created by the Agentic Mind team! ✨\nI’m here to help IT & Business students explore AI automation and see how AI empowers humans without replacing them. Ask me anything!');
+      } else if (t.includes('مرحب') || t.includes('هلا') || t.includes('السلام') || t.includes('اهلا') || t.includes('أهلا') || t.includes('كيفك') || t.includes('يسعد')) {
+        streamBotReply('أهلاً وسهلاً فيك! 👋✨ أنا نانو، المساعد الذكي الطائر من فريق Agentic Mind.\nمهمتي أساعد طلاب تكنولوجيا المعلومات والأعمال يكتشفوا قوة الأتمتة والذكاء الاصطناعي. عن شو حابب نحكي اليوم؟');
+      } else if (t.includes('مين') || t.includes('عرّف') || t.includes('عرفني') || t.includes('who are you') || t.includes('نانو')) {
+        streamBotReply('أهلاً بك! أنا نانو (Nano) 🤖✨ — مساعد ذكاء اصطناعي طائر ومطوّر من قِبل فريق Agentic Mind لطلاب الجامعة!\nفكرتي إني أكون شريكك الذكي: أشتغل معك في الأتمتة، أفكار المشاريع، وتنظيم المهام بين تخصصي الـ IT والأعمال، مع بقاء القرار والإبداع دايماً بيد الإنسان.');
+      } else if (t.includes('it') || t.includes('تكنولوجيا') || t.includes('برمج') || t.includes('تقني')) {
+        streamBotReply('لطلاب تكنولوجيا المعلومات (IT) 💻:\nبقدر أساعدكم في ربط الـ APIs، بناء Workflows أتمتة ذكية عبر n8n، تصميم هيكلية وكلاء الذكاء الاصطناعي (AI Agents)، وتقليل الشغل الروتيني عشان تركزوا على الهندسة والابتكار!');
+      } else if (t.includes('أعمال') || t.includes('اعمال') || t.includes('business') || t.includes('تسويق') || t.includes('إدارة')) {
+        streamBotReply('لطلاب إدارة الأعمال (Business) 💼:\nبقدر أساعدكم في أتمتة متابعة العملاء، تنظيم الجداول والتقارير، تحليل أفكار المشاريع الناشئة، وتوفير ساعات طويلة من العمل الإداري المتكرر بأقل تكلفة ممكنة!');
+      } else if (t.includes('يستبدل') || t.includes('بشر') || t.includes('إنسان') || t.includes('انسان') || t.includes('human')) {
+        streamBotReply('سؤال رائع! 🤝 هذه هي رسالة فريق Agentic Mind الأساسية:\nالذكاء الاصطناعي مش موجود عشان يستبدل الإنسان — أنا بقدر أسرّع 80% من المهام المتكررة، لكن الإبداع، المسؤولية، والقرارات الحساسة (Human-in-the-Loop) دايماً بتحتاج العقل البشري!');
+      } else if (t.includes('فكرة') || t.includes('مشروع') || t.includes('أتمتة') || t.includes('اتمتة')) {
+        streamBotReply('فكرة مشروع تجمع IT والأعمال 🚀:\nتقدروا تبنوا "فريق تشغيل ذكي لمشروع طلابي" — وكيل يرد على الطلاب والعملاء، وكيل ينظّم البيانات في Google Sheets، ووكيل يحوّل القرارات المهمة لقائد الفريق البشري للموافقة. سريع، عملي، ويوفر وقت وجهد ضخم!');
+      } else {
+        streamBotReply('أهلاً بك! أنا نانو من فريق Agentic Mind 🤖✨\nاسألني عن نفسي، أو كيف أساعد طلاب الـ IT والأعمال، أو عن دور العنصر البشري مع الذكاء الاصطناعي — (ولتشغيل الردود الحية على أي سؤال، اربط رابط n8n Cloud من زر "⚙️ ربط n8n" بالأعلى!).');
+      }
+    }, 650);
   }
 
-  function runDemoAgent(text) {
-    const t = text.toLowerCase();
-
-    // حالة 1: طلب خصم أو استرجاع -> Human-in-the-Loop
-    if (t.includes('خصم') || t.includes('تخفيض') || t.includes('استرجاع') || t.includes('refund')) {
-      addMessage(
-        "هذا القرار (خصم استثنائي) يحتاج موافقة المدير البشري 🧑‍💼.\nتم إرسال طلبك فوراً للوحة المدير، وبمجرد اعتماده سيصلك الرد هنا مباشرة!\n(الذكاء الاصطناعي ينفذ، لكن القرار الحساس بيد الإنسان).",
-        'bot',
-        '⏸️ بانتظار موافقة العنصر البشري',
-        'warn'
-      );
-      pendingApproval = {
-        customer: 'طالب من الجمهور',
-        service: 'متجر إلكتروني (بعد خصم 30%)',
-        amount: 84,
-        request: text
-      };
-      approvalText.textContent = `العميل طلب: "${text}". السعر الأصلي 120 JOD — بعد خصم 30% يصبح 84 JOD. هل توافق؟`;
-      approvalBox.classList.add('active');
-      return;
-    }
-
-    // حالة 2: مشكلة تقنية -> IT Support Agent
-    if (t.includes('مشكلة') || t.includes('عطل') || t.includes('خطأ') || t.includes('ما بيفتح') || t.includes('دفع') || t.includes('تطبيق')) {
-      ticketsCount++;
-      updateKPIs();
-      const row = document.createElement('tr');
-      row.innerHTML = `<td>عميل (لايف)</td><td>${text.slice(0, 38)}...</td><td><span class="badge high">High</span></td>`;
-      ticketsBody.prepend(row);
-
-      addMessage(
-        `تم استلام بلاغك وتحويله فوراً لقسم الـ IT! 🛠️\n• رقم التذكرة: #IT-${100 + ticketsCount}\n• الأولوية: عالية (High)\n• تم تسجيلها تلقائياً في لوحة المتابعة وتبليغ المبرمج.`,
-        'bot',
-        '💻 الموظف التقني (IT Agent)',
-        'it'
-      );
-      return;
-    }
-
-    // حالة 3: طلب خدمة -> Sales + Accountant Agent
-    if (t.includes('أطلب') || t.includes('بدي') || t.includes('احجز') || t.includes('موقع') || t.includes('متجر')) {
-      const isStore = t.includes('متجر');
-      const price = isStore ? 120 : 50;
-      const service = isStore ? 'متجر إلكتروني مصغّر' : 'تصميم موقع تعريفي';
-
-      revenue += price;
-      ordersCount++;
-      updateKPIs();
-      const row = document.createElement('tr');
-      row.innerHTML = `<td>عميل (لايف)</td><td>${service}</td><td>${price} JOD</td><td><span class="badge ok">Confirmed</span></td>`;
-      ordersBody.prepend(row);
-
-      addMessage(
-        `تم تأكيد طلبك بنجاح! 🎉\n• الخدمة: ${service}\n• التكلفة: ${price} JOD\n• المحاسب الذكي سجّل الفاتورة تلقائياً في جدول الحسابات (شوف لوحة المدير على اليسار 👀).`,
-        'bot',
-        '📊 موظف المبيعات والمحاسبة (AI)',
-        'human'
-      );
-      return;
-    }
-
-    // حالة 4: استفسار عن الأسعار أو عام
-    addMessage(
-      "أهلاً بك! هذه قائمة خدماتنا المعتمدة لطلاب ومشاريع الجامعة:\n1️⃣ تصميم موقع تعريفي: 50 JOD (3 أيام)\n2️⃣ متجر إلكتروني مصغّر: 120 JOD (7 أيام)\n3️⃣ نظام أتمتة بالذكاء الاصطناعي: 80 JOD (4 أيام)\n4️⃣ خطة عمل وتسويق (Business Plan): 35 JOD (يومين)\n\nإذا حابب تطلب أي خدمة، بس اكتبلي اسمها وراح يسجلها المحاسب فوراً!",
-      'bot',
-      '💼 موظف المبيعات (AI)'
-    );
-  }
-
-  // أزرار موافقة المدير البشري
-  document.getElementById('approveBtn').addEventListener('click', () => {
-    if (!pendingApproval) return;
-    revenue += pendingApproval.amount;
-    ordersCount++;
-    updateKPIs();
-    const row = document.createElement('tr');
-    row.innerHTML = `<td>${pendingApproval.customer}</td><td>${pendingApproval.service}</td><td>${pendingApproval.amount} JOD</td><td><span class="badge ok">Approved</span></td>`;
-    ordersBody.prepend(row);
-
-    addMessage(
-      `خبر رائع! 🎉 المدير البشري وافق على خصم الطلاب 30%.\n• السعر النهائي: ${pendingApproval.amount} JOD بدل 120 JOD.\n• تم تسجيل الطلب تلقائياً عند المحاسب!`,
-      'bot',
-      '✅ قرار معتمد من المدير البشري',
-      'human'
-    );
-    approvalBox.classList.remove('active');
-    pendingApproval = null;
-  });
-
-  document.getElementById('rejectBtn').addEventListener('click', () => {
-    if (!pendingApproval) return;
-    addMessage(
-      "شكراً لتواصلك! راجع المدير البشري طلب الخصم 30%، وللأسف الحد الأقصى الحالي للطلاب هو 15% (102 JOD). هل تحب نثبت الطلب بهذا السعر؟",
-      'bot',
-      '🧑‍💼 رد من المدير البشري',
-      'warn'
-    );
-    approvalBox.classList.remove('active');
-    pendingApproval = null;
-  });
-
-  // أحداث النموذج والأزرار السريعة
   chatForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    handleSend(chatInput.value);
+    handleUserMessage(chatInput.value);
   });
 
   document.querySelectorAll('.chip').forEach(btn => {
-    btn.addEventListener('click', () => handleSend(btn.dataset.msg));
+    btn.addEventListener('click', () => handleUserMessage(btn.dataset.q));
   });
 
-  document.getElementById('toggleOpsBtn').addEventListener('click', () => {
-    document.getElementById('mainGrid').classList.toggle('chat-only');
-  });
+  // نوافذ الفريق والإعدادات
+  const teamModal = document.getElementById('teamModal');
+  document.getElementById('openTeamBtn').onclick = () => teamModal.classList.add('open');
+  document.getElementById('closeTeamBtn').onclick = () => teamModal.classList.remove('open');
 
-  // نافذة الإعدادات
-  const modal = document.getElementById('settingsModal');
+  const configModal = document.getElementById('configModal');
   const n8nUrlInput = document.getElementById('n8nUrlInput');
-  document.getElementById('settingsBtn').addEventListener('click', () => {
-    n8nUrlInput.value = N8N_CHAT_URL;
-    modal.classList.add('open');
-  });
-  document.getElementById('closeModalBtn').addEventListener('click', () => modal.classList.remove('open'));
-  document.getElementById('saveSettingsBtn').addEventListener('click', () => {
-    N8N_CHAT_URL = n8nUrlInput.value.trim();
-    localStorage.setItem('n8n_chat_url', N8N_CHAT_URL);
-    updateModeUI();
-    modal.classList.remove('open');
-  });
+  document.getElementById('openConfigBtn').onclick = () => {
+    n8nUrlInput.value = n8nUrl;
+    configModal.classList.add('open');
+  };
+  document.getElementById('closeConfigBtn').onclick = () => configModal.classList.remove('open');
+  document.getElementById('saveConfigBtn').onclick = () => {
+    n8nUrl = n8nUrlInput.value.trim();
+    localStorage.setItem('agentic_n8n_url', n8nUrl);
+    configModal.classList.remove('open');
+    streamBotReply(n8nUrl ? 'تم الربط مع n8n Cloud بنجاح! ⚡ جرّب تحكي معي الآن.' : 'تم التبديل للوضع التجريبي.');
+  };
+
+  // خلفية النجوم الخفيفة
+  const canvas = document.getElementById('stars');
+  const ctx = canvas.getContext('2d');
+  let stars = [];
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+  for (let i = 0; i < 45; i++) {
+    stars.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 1.6 + 0.5,
+      vy: -(Math.random() * 0.25 + 0.08)
+    });
+  }
+  function drawStars() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = 'rgba(125, 211, 252, 0.55)';
+    for (const s of stars) {
+      s.y += s.vy;
+      if (s.y < 0) { s.y = canvas.height; s.x = Math.random() * canvas.width; }
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    requestAnimationFrame(drawStars);
+  }
+  drawStars();
 </script>
 </body>
 </html>
