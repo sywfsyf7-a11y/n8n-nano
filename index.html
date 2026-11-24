@@ -728,9 +728,9 @@
 </div>
 
 <script>
-  // ====== ضع رابط n8n Cloud هنا قبل الرفع على Render ======
-  const DEFAULT_N8N_URL = '';
-  let n8nUrl = localStorage.getItem('agentic_n8n_url') || DEFAULT_N8N_URL;
+  // ====== رابط n8n Cloud المربوط تلقائياً ======
+  const DEFAULT_N8N_URL = 'https://ol9o9y.app.n8n.cloud/webhook/6c63f19d-7218-4d96-b0fc-305f107bcc79/chat';
+  let n8nUrl = localStorage.getItem('agentic_n8n_url_v2') || DEFAULT_N8N_URL;
   const sessionId = 'am-' + Math.random().toString(36).slice(2, 10);
 
   const mascot = document.getElementById('mascot');
@@ -967,7 +967,7 @@
   document.getElementById('closeConfigBtn').onclick = () => configModal.classList.remove('open');
   document.getElementById('saveConfigBtn').onclick = () => {
     n8nUrl = n8nUrlInput.value.trim();
-    localStorage.setItem('agentic_n8n_url', n8nUrl);
+    localStorage.setItem('agentic_n8n_url_v2', n8nUrl);
     configModal.classList.remove('open');
     streamBotReply(n8nUrl ? 'تم الربط مع n8n Cloud بنجاح! ⚡ جرّب تحكي معي الآن.' : 'تم التبديل للوضع التجريبي.');
   };
