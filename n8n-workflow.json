@@ -1,0 +1,230 @@
+{
+  "name": "Agentic Mind — فريق التشغيل الذكي (IT & Business)",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "mode": "hostedChat",
+        "options": {
+          "title": "Agentic Mind — المساعد الرقمي",
+          "subtitle": "فريق المبيعات، المحاسبة، والدعم التقني (مدعوم بالذكاء الاصطناعي + إشراف بشري)",
+          "initialMessages": "أهلاً بك في Agentic Mind! 👋 أنا المساعد الذكي لفريق شركتنا.\nبقدر أساعدك في:\n1️⃣ الاستفسار عن الخدمات والأسعار وطلب خدمة جديدة (قسم المبيعات)\n2️⃣ تسجيل الطلبات والفواتير (قسم المحاسبة)\n3️⃣ الإبلاغ عن أي مشكلة تقنية (قسم الـ IT)\n\nكيف بقدر أخدمك اليوم؟",
+          "inputPlaceholder": "اكتب رسالتك هنا... (مثال: بدي أطلب تصميم موقع، أو عندي مشكلة تقنية)",
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "chat-trigger-01",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -380,
+        120
+      ],
+      "webhookId": "mini-ai-company-chat"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "أنت المنسق الذكي لفريق عمل افتراضي مصغّر اسمه Agentic Mind لخدمة مشاريع طلاب الجامعات في الأردن (تخصصي تكنولوجيا المعلومات والأعمال).\n\nتحدث باللغة العربية الواضحة والودودة (بأسلوب احترافي قريب من الطلاب)، والعملة هي الدينار الأردني (JOD).\n\n### قائمة الخدمات والأسعار المعتمدة:\n1. تصميم موقع تعريفي (Landing Page): 50 JOD — مدة التنفيذ: 3 أيام\n2. متجر إلكتروني مصغّر: 120 JOD — مدة التنفيذ: 7 أيام\n3. نظام أتمتة بالذكاء الاصطناعي (AI Automation): 80 JOD — مدة التنفيذ: 4 أيام\n4. استشارة خطة عمل وتسويق (Business Plan): 35 JOD — مدة التنفيذ: يومين\n\n### أدوارك الثلاثة وقواعد العمل:\n1. **قسم المبيعات والمحاسبة:**\n   - إذا سأل العميل عن الأسعار، اعرضها بوضوح.\n   - إذا أكد العميل طلب خدمة، اطلب اسمه (إن لم يذكره)، ثم استخدم أداة `Log_Order_Accounting` لتسجيل الطلب فوراً في جدول المحاسبة، وأكد له رقم/تفاصيل الطلب.\n\n2. **قسم الدعم التقني (IT Support):**\n   - إذا أبلغ العميل عن مشكلة تقنية (مثل توقف موقع، خطأ في الدفع، رابط لا يعمل)، تعاطف معه، قيّم الأولوية (High / Medium / Low)، واستخدم أداة `Create_IT_Ticket` لفتح تذكرة دعم تقني فوراً، ثم أخبره أن فريق الـ IT استلم التذكرة.\n\n3. **قاعدة العنصر البشري (Human-in-the-Loop) — قاعدة صارمة جداً:**\n   - إذا طلب العميل **خصماً** (مثل خصم طلاب 20% أو 30%)، أو **استرجاع مبلغ (Refund)**، أو **تعديلاً استثنائياً خارج الأسعار المعتمدة**:\n   - **لا توافق ولا ترفض من نفسك أبداً!**\n   - استخدم أداة `Request_Human_Approval` لإرسال طلب موافقة فوري للمدير البشري يتضمن ملخص طلب العميل واقتراحك.\n   - أخبر العميل بلطف: \"هذا القرار يحتاج موافقة المدير البشري — تم إرسال طلبك للمدير فوراً، وسيصلك الرد بمجرد اعتماده (لأن الذكاء الاصطناعي يساعدنا بالتنفيذ، لكن القرارات الحساسة دائماً بيد الإنسان!).\"\n\nكن مختصراً، منظماً، واستخدم الإيموجي بشكل خفيف ومناسب."
+        }
+      },
+      "id": "ai-agent-01",
+      "name": "AI Company Team Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        -40,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash",
+        "options": {
+          "temperature": 0.4
+        }
+      },
+      "id": "gemini-model-01",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 10
+      },
+      "id": "simple-memory-01",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -60,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "استخدم هذه الأداة لتسجيل أي طلب خدمة جديد مؤكد من العميل في جدول المحاسبة (Google Sheets).",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "PUT_YOUR_GOOGLE_SHEET_ID_HERE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Orders",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Date": "={{ $now.toFormat('yyyy-MM-dd HH:mm') }}",
+            "Customer_Name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Customer_Name', 'اسم العميل أو الطالب', 'string') }}",
+            "Service": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Service', 'اسم الخدمة المطلوبة', 'string') }}",
+            "Amount_JOD": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Amount_JOD', 'السعر بالدينار الأردني كرقم فقط', 'number') }}",
+            "Status": "Confirmed",
+            "Notes": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Notes', 'أي ملاحظات إضافية من العميل', 'string') }}"
+          }
+        }
+      },
+      "id": "sheets-orders-tool-01",
+      "name": "Log_Order_Accounting",
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.5,
+      "position": [
+        120,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "استخدم هذه الأداة لفتح تذكرة دعم تقني (IT Ticket) عندما يبلغ العميل عن مشكلة تقنية أو عطل.",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "PUT_YOUR_GOOGLE_SHEET_ID_HERE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "IT_Tickets",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Date": "={{ $now.toFormat('yyyy-MM-dd HH:mm') }}",
+            "Customer_Name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Customer_Name', 'اسم العميل', 'string') }}",
+            "Issue_Summary": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Issue_Summary', 'ملخص المشكلة التقنية', 'string') }}",
+            "Priority": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Priority', 'الأولوية: High أو Medium أو Low', 'string') }}",
+            "Status": "Open"
+          }
+        }
+      },
+      "id": "sheets-tickets-tool-01",
+      "name": "Create_IT_Ticket",
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.5,
+      "position": [
+        300,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "استخدم هذه الأداة فوراً عندما يطلب العميل خصماً أو استرجاع مبلغ أو أي قرار استثنائي يحتاج موافقة المدير البشري (Human-in-the-Loop).",
+        "sendTo": "PUT_MANAGER_EMAIL_HERE@gmail.com",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Email_Subject', 'عنوان واضح مثل: طلب موافقة خصم من عميل', 'string') }}",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Email_Body', 'تفاصيل طلب العميل، المبلغ، واقتراح الرد للمدير البشري للموافقة أو الرفض', 'string') }}"
+      },
+      "id": "gmail-approval-tool-01",
+      "name": "Request_Human_Approval",
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        480,
+        380
+      ]
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Company Team Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Company Team Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Company Team Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log_Order_Accounting": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Company Team Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create_IT_Ticket": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Company Team Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Request_Human_Approval": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Company Team Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
