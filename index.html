@@ -849,9 +849,9 @@
 </div>
 
 <script>
-  // ====== رابط n8n Cloud المربوط تلقائياً ======
-  const DEFAULT_N8N_URL = 'https://ol9o9y.app.n8n.cloud/webhook/6c63f19d-7218-4d96-b0fc-305f107bcc79/chat';
-  let n8nUrl = localStorage.getItem('agentic_n8n_url_v2') || DEFAULT_N8N_URL;
+  // ====== رابط n8n Cloud المربوط تلقائياً (الـ Workflow الجديد بـ 6 مفاتيح) ======
+  const DEFAULT_N8N_URL = 'https://ol9o9y.app.n8n.cloud/webhook/945c10c0-7197-4404-826d-a59b6a786855/chat';
+  let n8nUrl = localStorage.getItem('agentic_n8n_url_v3') || DEFAULT_N8N_URL;
   let sessionId = 'am-' + Math.random().toString(36).slice(2, 10);
 
   // ====== نظام حفظ سجل المحادثات محلياً (Local Chat History Sidebar) ======
@@ -1908,7 +1908,7 @@
   document.getElementById('closeConfigBtn').onclick = () => configModal.classList.remove('open');
   document.getElementById('saveConfigBtn').onclick = () => {
     n8nUrl = n8nUrlInput.value.trim();
-    localStorage.setItem('agentic_n8n_url_v2', n8nUrl);
+    localStorage.setItem('agentic_n8n_url_v3', n8nUrl);
     configModal.classList.remove('open');
     streamBotReply(n8nUrl ? 'تم الربط مع n8n Cloud بنجاح! ⚡ جرّب تحكي معي الآن.' : 'تم التبديل للوضع التجريبي.');
   };
