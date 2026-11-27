@@ -293,6 +293,107 @@
       color: #7dd3fc;
     }
 
+    /* لعبة تحدّى نانو التفاعلية */
+    .quiz-card {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .quiz-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      color: #7dd3fc;
+      font-weight: 700;
+    }
+    .quiz-q {
+      font-size: 0.96rem;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.6;
+    }
+    .quiz-opts {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+    .quiz-opt {
+      font-family: inherit;
+      text-align: right;
+      padding: 9px 13px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.05);
+      color: #e2e8f0;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .quiz-opt:hover:not(:disabled) {
+      background: rgba(56, 189, 248, 0.18);
+      border-color: var(--cyan);
+    }
+    .quiz-opt.correct {
+      background: rgba(16, 185, 129, 0.25) !important;
+      border-color: #10b981 !important;
+      color: #6ee7b7 !important;
+    }
+    .quiz-opt.wrong {
+      background: rgba(239, 68, 68, 0.22) !important;
+      border-color: #ef4444 !important;
+      color: #fca5a5 !important;
+    }
+    .quiz-feedback {
+      font-size: 0.84rem;
+      line-height: 1.55;
+      padding: 8px 11px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.04);
+      display: none;
+    }
+    .quiz-next-btn {
+      align-self: flex-start;
+      margin-top: 4px;
+      font-family: inherit;
+      padding: 6px 14px;
+      border-radius: 999px;
+      border: none;
+      background: var(--gemini-grad);
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: none;
+    }
+
+    .chip.quiz-chip {
+      background: linear-gradient(135deg, rgba(250, 204, 21, 0.2), rgba(56, 189, 248, 0.2));
+      border-color: rgba(250, 204, 21, 0.55);
+      color: #fef08a;
+    }
+
+    /* بطاقة QR Code القابلة للإظهار والإخفاء */
+    .qr-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 12px;
+    }
+    .qr-frame {
+      background: #ffffff;
+      padding: 12px;
+      border-radius: 18px;
+      box-shadow: 0 10px 30px rgba(56, 189, 248, 0.25);
+    }
+    .qr-frame img {
+      width: 210px;
+      height: 210px;
+      display: block;
+    }
+
     .msg-row.user .bubble {
       background: linear-gradient(135deg, #2563eb, #6366f1);
       color: #fff;
@@ -732,6 +833,7 @@
     <span class="brand-tag">AI Live</span>
   </div>
   <div class="header-btns">
+    <button class="pill-btn" id="toggleQrBtn" title="إظهار/إخفاء QR Code">📱<span class="btn-label"> QR</span></button>
     <button class="pill-btn" id="toggleVoiceBtn" title="تشغيل/كتم صوت نانو">🔇<span class="btn-label"> الصوت: مكتوم</span></button>
     <button class="pill-btn" id="openTeamBtn" title="فريق العمل">👥<span class="btn-label"> فريق العمل</span></button>
     <button class="pill-btn" id="openConfigBtn" title="ربط n8n">⚙️<span class="btn-label"> ربط n8n</span></button>
@@ -762,8 +864,9 @@
   <!-- رسائل المحادثة -->
   <div class="chat-stream" id="chatStream"></div>
 
-  <!-- أزرار سريعة لنانو + اختصارات جميع المواد السبع -->
+  <!-- أزرار سريعة لنانو + لعبة التحدي + اختصارات جميع المواد السبع -->
   <div class="suggestions" id="suggestions">
+    <button class="chip quiz-chip" id="startQuizBtn">🎯 تحدّى نانو!</button>
     <button class="chip" data-q="مين إنت يا نانو وشو فكرتك؟">✨ مين نانو؟</button>
     <button class="chip" data-q="لخّص لي أهم مفاهيم مادة إدارة 1">💼 إدارة 1</button>
     <button class="chip" data-q="لخّص لي أهم مفاهيم مادة إدارة 2">📋 إدارة 2</button>
@@ -793,6 +896,23 @@
   </div>
   <div class="history-list" id="historyList"></div>
 </aside>
+</div>
+
+<!-- نافذة QR Code القابلة للإظهار والإخفاء -->
+<div class="modal-bg" id="qrModal">
+  <div class="modal" style="max-width:360px;">
+    <div class="modal-head">
+      <h3>📱 امسح الكود وجرّب نانو!</h3>
+      <button class="pill-btn" id="closeQrBtn">✕ إخفاء</button>
+    </div>
+    <div class="qr-box">
+      <div class="qr-frame">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=6&data=https://n8n-nano-1.onrender.com/" alt="QR Code لنانو" />
+      </div>
+      <p style="font-size:0.86rem; color:var(--text); font-weight:700;">Agentic Mind • نانو الذكي</p>
+      <p style="font-size:0.78rem; color:var(--muted); direction:ltr;">https://n8n-nano-1.onrender.com/</p>
+    </div>
+  </div>
 </div>
 
 <!-- نافذة فريق العمل -->
@@ -1797,39 +1917,195 @@
     }, speed);
   }
 
-  // إجابات فورية محفوظة للأزرار الأربعة السريعة (بدون انتظار n8n!)
+  // إجابات فورية محفوظة لهوية نانو + جميع المواد السبع (0 استهلاك من الـ API!)
   const INSTANT_ANSWERS = {
-    'مين إنت يا نانو وشو فكرتك؟':
-      'أهلاً بك! أنا نانو (Nano) 🛸✨ — مشروع طموح لذكاء اصطناعي محلي طائر من فريق Agentic Mind!\nالنسخة المعروضة اليوم هي نموذج أولي تفاعلي (Prototype) يورّيكم كيف رح يكون عندك مساعد ذكي خاص فيك: محلي 100%، يحمي خصوصيتك، وبيرافقك ويساعدك بكثير أمور!',
-    'شو يعني ذكاء اصطناعي محلي وحفظ الخصوصية؟':
-      'ميزة نانو الأقوى هي إنه ذكاء اصطناعي محلي (Local AI) 🔒:\nيعني يعمل على جهازك بدون إرسال بياناتك أو أسرارك لخوادم الشركات الخارجية! هذه نقطة قوة ضخمة لطلاب الـ IT في أمن المعلومات، وللشركات والجهات الحساسة اللي بتدور على خصوصية 100%.',
-    'كيف بتتعلّم مني وبربّيك على إيدي؟':
-      'فكرة نانو إنك بتربّيه على إيديك 🧠✨:\nكل ما تحكي معه وتشتغل معه، بيتعلّم أسلوبك، اهتماماتك، وطريقة شغلك بشكل خاص فيك لوحدك — زي مساعد شخصي مخصّص إلك، بس بدون ما يشارك أي معلومة برا جهازك!',
-    'شو الرؤية المستقبلية لمشروع نانو للشركات والدول؟':
-      'الرؤية المستقبلية لـ نانو (تجمع الـ IT والأعمال) 🚀:\n• تقنياً (IT): تطوير درون ذكي حقيقي مدمج بداخله شريحة ذكاء اصطناعي محلي (Edge AI) تعمل أوفلاين بالكامل.\n• تجارياً (Business): بناء شركة ناشئة توفّر مساعدين ذكيين آمنين ومحلّيين للأفراد، الشركات، وحتى المؤسسات والدول التي تمنع خروج بياناتها للسحابة!'
+    'مين إنت يا نانو وشو فكرتك؟': {
+      text: 'أهلاً بك! أنا نانو (Nano) 🛸✨ — مشروع طموح لذكاء اصطناعي محلي طائر من فريق Agentic Mind!\nالنسخة المعروضة اليوم هي نموذج أولي تفاعلي (Prototype) يجمع بين تخصصي تكنولوجيا المعلومات والأعمال، ومزوّد بقاعدة معرفة لمواد كلية الأعمال. تقدر تسألني أي سؤال أو تضغط "🎯 تحدّى نانو!" لتختبر معلوماتك!',
+      course: null
+    },
+    'لخّص لي أهم مفاهيم مادة إدارة 1': {
+      text: 'ملخص سريع لمادة إدارة 1 (Principles of Management) 💼:\n• الوظائف الأربع للإدارة (POLC): التخطيط (Planning)، التنظيم (Organizing)، القيادة (Leading)، والرقابة (Controlling).\n• الفرق بين الكفاءة (Efficiency: عمل الأشياء بطريقة صحيحة بأقل موارد) والفعالية (Effectiveness: عمل الأشياء الصحيحة لتحقيق الأهداف).\n• مستويات الإدارة: عليا (Top)، وسطى (Middle)، وإشرافية (First-line).\n\nاسألني أي سؤال تفصيلي في شابتر معين وراح أجاوبك من ملفات المادة!',
+      course: 'إدارة 1'
+    },
+    'لخّص لي أهم مفاهيم مادة إدارة 2': {
+      text: 'ملخص سريع لمادة إدارة 2 (Advanced Management) 📋:\n• الإدارة الاستراتيجية (Strategic Management) وتحليل SWOT (نقاط القوة والضعف والفرص والتهديدات).\n• الهياكل التنظيمية (الوظيفي، المصفوفي، والمرن) وإدارة التغيير والابتكار.\n• نظريات التحفيز (هرم ماسلو، نظرية هيرزبرغ) وأنماط القيادة الحديثة والعمل الجماعي.\n\nاكتبلي أي مصطلح أو موضوع حابب نشرحه بعمق!',
+      course: 'إدارة 2'
+    },
+    'لخّص لي أهم مفاهيم مادة اقتصاد جزئي': {
+      text: 'ملخص سريع لمادة الاقتصاد الجزئي (Microeconomics) 📉:\n• يدرس سلوك المستهلك والمنتج وقرارات الأفراد والشركات في الأسواق.\n• قانون الطلب (علاقة عكسية مع السعر) وقانون العرض (علاقة طردية مع السعر) ونقطة توازن السوق.\n• المرونة السعرية للطلب، تكلفة الفرصة البديلة (Opportunity Cost)، وهياكل الأسواق (المنافسة الكاملة، الاحتكار، واحتكار القلة).\n\nاسألني أي سؤال في الاقتصاد الجزئي وراح أشرحلك إياه ببساطة!',
+      course: 'اقتصاد جزئي'
+    },
+    'لخّص لي أهم مفاهيم مادة اقتصاد كلّي': {
+      text: 'ملخص سريع لمادة الاقتصاد الكلّي (Macroeconomics) 📈:\n• يدرس الاقتصاد الوطني ككل: الناتج المحلي الإجمالي (GDP)، التضخم (Inflation)، ومعدل البطالة.\n• السياسة المالية (الضرائب والإنفاق الحكومي) والسياسة النقدية (البنك المركزي وأسعار الفائدة).\n• الدورات الاقتصادية، ميزان المدفوعات، والنمو الاقتصادي المستدام.\n\nاسألني عن أي مؤشر أو قانون في الاقتصاد الكلي!',
+      course: 'اقتصاد كلّي'
+    },
+    'لخّص لي أهم مفاهيم مادة مبادئ مالية': {
+      text: 'ملخص سريع لمادة مبادئ الإدارة المالية (Principles of Finance) 💰:\n• القيمة الزمنية للنقود (Time Value of Money): دينار اليوم قيمته أكبر من دينار في المستقبل (PV و FV).\n• تقييم الاستثمارات والمشاريع: صافي القيمة الحالية (NPV) ومعدل العائد الداخلي (IRR) وفترة الاسترداد.\n• العلاقة بين المخاطرة والعائد (Risk vs. Return)، تكلفة رأس المال (WACC)، وتحليل النسب المالية.\n\nاكتبلي أي قانون مالي أو مسألة بدك نراجعها!',
+      course: 'مبادئ مالية'
+    },
+    'لخّص لي أهم مفاهيم مادة محاسبة 1': {
+      text: 'ملخص سريع لمادة محاسبة 1 (Financial Accounting — IFRS) 📊:\n• المعادلة المحاسبية الأساسية: الأصول (Assets) = الالتزامات (Liabilities) + حقوق الملكية (Equity).\n• الدورة المحاسبية: تحليل العمليات ➔ القيود اليومية (مدين/دائن) ➔ الترحيل لدفتر الأستاذ ➔ ميزان المراجعة ➔ قيود التسوية ➔ القوائم المالية.\n• القوائم المالية الأساسية: قائمة الدخل، قائمة المركز المالي (الميزانية)، وقائمة التغيرات في حقوق الملكية.\n\nاسألني عن أي قيد محاسبي أو مفهوم!',
+      course: 'محاسبة 1'
+    },
+    'لخّص لي أهم مفاهيم مادة محاسبة 2': {
+      text: 'ملخص سريع لمادة محاسبة 2 (Financial Accounting II — IFRS) 🧾:\n• طرق تقييم المخزون (FIFO والمتوسط المرجح) والرقابة الداخلية وتسوية البنك (Bank Reconciliation).\n• حساب الذمم المدينة ومخصص الديون المشكوك في تحصيلها.\n• الأصول الثابتة وطرق الاستهلاك (القسط الثابت، الرصيد المتناقص)، والالتزامات طويلة الأجل وقائمة التدفقات النقدية.\n\nاكتبلي أي موضوع من محاسبة 2 نراجعه مع بعض!',
+      course: 'محاسبة 2'
+    }
   };
+
+  // ====== لعبة "تحدّى نانو!" التفاعلية لطلاب الأعمال والـ IT ======
+  const QUIZ_BANK = [
+    {
+      course: 'محاسبة 1',
+      q: 'ما هي المعادلة المحاسبية الأساسية وفق معايير IFRS؟',
+      opts: ['الأصول = الالتزامات + حقوق الملكية', 'الأصول = الإيرادات − المصاريف', 'الالتزامات = الأصول + حقوق الملكية'],
+      ans: 0,
+      explain: 'صحيح! المعادلة الأساسية هي: Assets = Liabilities + Equity.'
+    },
+    {
+      course: 'إدارة 1',
+      q: 'أي مما يلي يعبّر بدقة عن مفهوم "الكفاءة" (Efficiency) في الإدارة؟',
+      opts: ['تحقيق الأهداف بغض النظر عن التكلفة', 'عمل الأشياء بطريقة صحيحة بأقل موارد ممكنة', 'زيادة عدد الموظفين فقط'],
+      ans: 1,
+      explain: 'ممتاز! الكفاءة هي Doing things right (تقليل الهدر والموارد)، بينما الفعالية هي Doing the right things.'
+    },
+    {
+      course: 'مبادئ مالية',
+      q: 'في تقييم المشاريع الاستثمارية، متى يُقبل المشروع حسب معيار صافي القيمة الحالية (NPV)؟',
+      opts: ['عندما يكون NPV أقل من صفر', 'عندما يكون NPV أكبر من صفر (موجب)', 'عندما يكون NPV يساوي سالب 1'],
+      ans: 1,
+      explain: 'برافو! إذا كان NPV > 0 فالمشروع يضيف قيمة حقيقية للشركة ويُقبل.'
+    },
+    {
+      course: 'اقتصاد جزئي',
+      q: 'وفق قانون الطلب (Law of Demand)، عند ارتفاع سعر سلعة عادية (مع ثبات العوامل الأخرى) فإن الكمية المطلوبة:',
+      opts: ['تزداد', 'تنخفض', 'تبقى ثابتة دائماً'],
+      ans: 1,
+      explain: 'رائع! العلاقة بين السعر والكمية المطلوبة علاقة عكسية.'
+    },
+    {
+      course: 'اقتصاد كلّي',
+      q: 'ما هو المؤشر الرئيسي الذي يقيس القيمة السوقية لجميع السلع والخدمات النهائية المنتَجة داخل الدولة خلال سنة؟',
+      opts: ['معدل البطالة', 'الناتج المحلي الإجمالي (GDP)', 'سعر الصرف'],
+      ans: 1,
+      explain: 'ممتاز! الناتج المحلي الإجمالي (GDP) هو المقياس الأساسي لحجم الاقتصاد.'
+    },
+    {
+      course: 'محاسبة 2',
+      q: 'في طريقة القسط الثابت (Straight-Line) لحساب الاستهلاك السنوي للأصل الثابت، نحسب:',
+      opts: ['(التكلفة − القيمة المتبقية) ÷ العمر الإنتاجي', 'التكلفة × العمر الإنتاجي', 'القيمة السوقية ÷ 2'],
+      ans: 0,
+      explain: 'إجابة دقيقة! (Cost − Residual Value) / Useful Life.'
+    },
+    {
+      course: 'مبادئ مالية',
+      q: 'ماذا تعني قاعدة "القيمة الزمنية للنقود" (Time Value of Money)؟',
+      opts: ['دينار المستقبل أفضل من دينار اليوم', 'دينار اليوم تساوي قيمته أكثر من دينار في المستقبل لإمكانية استثماره', 'قيمة النقود لا تتغير مع الزمن'],
+      ans: 1,
+      explain: 'صح 100%! لأن دينار اليوم يمكن استثماره لتحقيق عائد فوري.'
+    },
+    {
+      course: 'Agentic Mind • IT & Business',
+      q: 'ما هي الفكرة الأساسية لمشروع نانو (Nano) من فريق Agentic Mind؟',
+      opts: ['استبدال الإنسان بالكامل', 'ذكاء اصطناعي محلي يحفظ الخصوصية ويساعد الإنسان دون استبداله', 'إرسال بيانات الطلاب للشركات الخارجية'],
+      ans: 1,
+      explain: 'أحسنت! نانو يجمع بين الخصوصية المحلية وقوة الذكاء الاصطناعي لتمكين الإنسان!'
+    }
+  ];
+
+  let quizIndex = 0;
+  let quizScore = 0;
+
+  function launchQuizQuestion() {
+    welcomeHero.classList.add('compact');
+    appContainer?.classList.add('chat-active');
+    const item = QUIZ_BANK[quizIndex % QUIZ_BANK.length];
+    quizIndex++;
+
+    setNanoAnim('wave');
+    setMascotState('idle', `🎯 تحدّي نانو — سؤال في مادة ${item.course}!`);
+
+    const row = document.createElement('div');
+    row.className = 'msg-row bot';
+    row.innerHTML = `
+      <div class="msg-avatar"><img src="logo.png" alt="Nano" /></div>
+      <div class="bubble">
+        <div class="quiz-card">
+          <div class="quiz-meta">
+            <span>📚 ${item.course}</span>
+            <span>🏆 نقاطك: ${quizScore}</span>
+          </div>
+          <div class="quiz-q">${item.q}</div>
+          <div class="quiz-opts"></div>
+          <div class="quiz-feedback"></div>
+          <button type="button" class="quiz-next-btn">السؤال التالي ➡️</button>
+        </div>
+      </div>
+    `;
+
+    const optsWrap = row.querySelector('.quiz-opts');
+    const fb = row.querySelector('.quiz-feedback');
+    const nextBtn = row.querySelector('.quiz-next-btn');
+
+    item.opts.forEach((optText, idx) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'quiz-opt';
+      btn.textContent = optText;
+      btn.addEventListener('click', () => {
+        const allBtns = optsWrap.querySelectorAll('.quiz-opt');
+        allBtns.forEach(b => b.disabled = true);
+        if (idx === item.ans) {
+          btn.classList.add('correct');
+          quizScore++;
+          fb.style.display = 'block';
+          fb.innerHTML = `🎉 <strong>إجابة صحيحة!</strong> ${item.explain}`;
+          setNanoAnim('celebrate');
+          trigger3DSparkles();
+          playCuteChime();
+          speakText('برافو! إجابة صحيحة!');
+        } else {
+          btn.classList.add('wrong');
+          allBtns[item.ans]?.classList.add('correct');
+          fb.style.display = 'block';
+          fb.innerHTML = `💡 <strong>قريبة!</strong> ${item.explain}`;
+          setNanoAnim('fly');
+        }
+        nextBtn.style.display = 'inline-block';
+        chatStream.scrollTop = chatStream.scrollHeight;
+      });
+      optsWrap.appendChild(btn);
+    });
+
+    nextBtn.addEventListener('click', () => {
+      nextBtn.disabled = true;
+      launchQuizQuestion();
+    });
+
+    chatStream.appendChild(row);
+    chatStream.scrollTop = chatStream.scrollHeight;
+  }
+
+  document.getElementById('startQuizBtn')?.addEventListener('click', launchQuizQuestion);
+
+  // زر إظهار وإخفاء الـ QR Code
+  const qrModal = document.getElementById('qrModal');
+  document.getElementById('toggleQrBtn')?.addEventListener('click', () => {
+    qrModal.classList.toggle('open');
+  });
+  document.getElementById('closeQrBtn')?.addEventListener('click', () => {
+    qrModal.classList.remove('open');
+  });
+  qrModal?.addEventListener('click', (e) => {
+    if (e.target === qrModal) qrModal.classList.remove('open');
+  });
 
   function getSmartLocalFallback(text) {
     const t = text.trim().toLowerCase();
     if (/^(hi|hello|hey|yo|sup|good morning|good evening)\b/.test(t)) {
-      return 'Hey! 👋 I’m Nano — a flying, 100% Local AI companion prototype by Agentic Mind! ✨\nYour data stays private on your own device (never sent to external companies), and I learn directly from you. Ask me anything or tap 🎤 to talk!';
+      return 'Hey! 👋 I’m Nano — a flying, 100% Local AI companion prototype by Agentic Mind! ✨\nAsk me about your Business courses or tap 🎯 to play the Nano Quiz!';
     }
-    if (t.includes('مرحب') || t.includes('هلا') || t.includes('السلام') || t.includes('اهلا') || t.includes('أهلا') || t.includes('كيفك') || t.includes('كيف حالك') || t.includes('يسعد')) {
-      return 'أهلاً وسهلاً! 👋✨ أنا نانو، الذكاء الاصطناعي المحلي الطائر من فريق Agentic Mind.\nتمام الحمد لله وجاهز أساعدك! اسألني عن فكرتي، الخصوصية، كيف بتعلّم منك، أو الرؤية المستقبلية للشركة.';
-    }
-    if (t.includes('مين') || t.includes('فكرتك') || t.includes('عرّف') || t.includes('عرفني') || t.includes('نانو')) {
-      return INSTANT_ANSWERS['مين إنت يا نانو وشو فكرتك؟'];
-    }
-    if (t.includes('محلي') || t.includes('خصوصي') || t.includes('شركات') || t.includes('بيانات') || t.includes('local') || t.includes('privacy')) {
-      return INSTANT_ANSWERS['شو يعني ذكاء اصطناعي محلي وحفظ الخصوصية؟'];
-    }
-    if (t.includes('تتعل') || t.includes('ترب') || t.includes('إيد') || t.includes('ايد') || t.includes('learn')) {
-      return INSTANT_ANSWERS['كيف بتتعلّم مني وبربّيك على إيدي؟'];
-    }
-    if (t.includes('رؤية') || t.includes('مستقبل') || t.includes('دول') || t.includes('شركة') || t.includes('business') || t.includes('it')) {
-      return INSTANT_ANSWERS['شو الرؤية المستقبلية لمشروع نانو للشركات والدول؟'];
-    }
-    return 'أهلاً بك! 🛸✨ أنا نانو، الذكاء الاصطناعي المحلي الطائر من فريق Agentic Mind.\nفكرتي تجمع بين تكنولوجيا المعلومات (ذكاء محلي يحفظ خصوصيتك 100%) وإدارة الأعمال (رؤية شركة ناشئة لمساعدين شخصيين آمنين). جرّب أي سؤال من الأزرار السريعة بالأسفل أو اسألني عن الخصوصية والرؤية المستقبلية!';
+    return 'أهلاً بك! 🛸✨ أنا نانو، الذكاء الاصطناعي المحلي الطائر من فريق Agentic Mind.\nجرّب أي زر من المواد السبع بالأسفل أو اضغط 🎯 تحدّى نانو!';
   }
 
   async function handleUserMessage(text, useInstant = false) {
@@ -1837,10 +2113,13 @@
     addUserBubble(text);
     chatInput.value = '';
 
-    // إذا ضغط المستخدم على زر هوية نانو الفوري -> رد فوري محفوظ!
+    // إذا ضغط المستخدم على زر هوية نانو أو أي زر من المواد السبع -> رد فوري محفوظ (0 API Calls!)
     if (useInstant && INSTANT_ANSWERS[text]) {
-      setMascotState('thinking', '⚡ لحظة...');
-      setTimeout(() => streamBotReply(INSTANT_ANSWERS[text]), 220);
+      const preset = INSTANT_ANSWERS[text];
+      setMascotState('thinking', preset.course ? `📚 جاري فتح ملخص ${preset.course}...` : '⚡ لحظة...');
+      setTimeout(() => {
+        streamBotReply(preset.text, preset.course ? [{ c: preset.course }] : []);
+      }, 220);
       return;
     }
 
@@ -1890,7 +2169,7 @@
     handleUserMessage(chatInput.value);
   });
 
-  document.querySelectorAll('.chip').forEach(btn => {
+  document.querySelectorAll('.chip[data-q]').forEach(btn => {
     btn.addEventListener('click', () => handleUserMessage(btn.dataset.q, true));
   });
 
