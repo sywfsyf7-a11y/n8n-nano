@@ -367,6 +367,37 @@
       cursor: pointer;
       display: none;
     }
+    .quiz-actions-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .quiz-topic-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .quiz-topic-btn {
+      font-family: inherit;
+      padding: 9px 11px;
+      border-radius: 12px;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      background: rgba(56, 189, 248, 0.1);
+      color: #e0f2fe;
+      font-size: 0.83rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s;
+      text-align: center;
+    }
+    .quiz-topic-btn:hover {
+      background: rgba(56, 189, 248, 0.25);
+      border-color: var(--cyan);
+      color: #fff;
+      transform: translateY(-2px);
+    }
 
     .chip.quiz-chip {
       background: linear-gradient(135deg, rgba(250, 204, 21, 0.2), rgba(56, 189, 248, 0.2));
@@ -2083,16 +2114,74 @@
     }
   ];
 
-  let quizOrder = [];
+  // تصنيفات تحدي نانو التخصصية
+  const QUIZ_TOPICS = [
+    { id: 'ai_it', label: '🤖 ذكاء اصطناعي و IT', match: c => /ذكاء|تكنولوجيا|أمن|IT|AI/i.test(c) },
+    { id: 'business', label: '🚀 ريادة الأعمال والبزنس', match: c => /ريادة|Business/i.test(c) },
+    { id: 'mgmt', label: '💼 إدارة 1 و 2', match: c => /إدارة/.test(c) },
+    { id: 'econ', label: '📈 اقتصاد جزئي وكلّي', match: c => /اقتصاد/.test(c) },
+    { id: 'finance', label: '💰 مبادئ مالية', match: c => /مالية/.test(c) },
+    { id: 'acc', label: '📊 محاسبة 1 و 2', match: c => /محاسبة/.test(c) },
+    { id: 'all', label: '🎲 تحدي شامل (كل المواد)', match: () => true }
+  ];
+
+  let selectedTopicId = 'all';
+  let quizPool = [];
   let quizPos = 0;
   let quizScore = 0;
 
+  function showQuizTopicPicker() {
+    welcomeHero.classList.add('compact');
+    appContainer?.classList.add('chat-active');
+    setNanoAnim('wave');
+    setMascotState('idle', '🎯 اختر المادة أو التخصص الذي تريد التحدي فيه!');
+
+    const row = document.createElement('div');
+    row.className = 'msg-row bot';
+    row.innerHTML = `
+      <div class="msg-avatar"><img src="logo.png" alt="Nano" /></div>
+      <div class="bubble">
+        <div class="quiz-card">
+          <div class="quiz-meta">
+            <span>🎯 تحدّى نانو!</span>
+            <span>🏆 نقاطك: ${quizScore}</span>
+          </div>
+          <div class="quiz-q">اختر المادة أو المجال اللي حابب تتحدى نانو فيه:</div>
+          <div class="quiz-topic-grid"></div>
+        </div>
+      </div>
+    `;
+
+    const grid = row.querySelector('.quiz-topic-grid');
+    QUIZ_TOPICS.forEach(topic => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'quiz-topic-btn';
+      btn.textContent = topic.label;
+      btn.addEventListener('click', () => {
+        selectedTopicId = topic.id;
+        quizPool = QUIZ_BANK.filter(item => topic.match(item.course)).sort(() => Math.random() - 0.5);
+        quizPos = 0;
+        launchQuizQuestion();
+      });
+      grid.appendChild(btn);
+    });
+
+    chatStream.appendChild(row);
+    chatStream.scrollTop = chatStream.scrollHeight;
+  }
+
   function getNextQuizItem() {
-    if (!quizOrder.length || quizPos >= quizOrder.length) {
-      quizOrder = QUIZ_BANK.map((_, i) => i).sort(() => Math.random() - 0.5);
+    if (!quizPool.length) {
+      const topic = QUIZ_TOPICS.find(t => t.id === selectedTopicId) || QUIZ_TOPICS[QUIZ_TOPICS.length - 1];
+      quizPool = QUIZ_BANK.filter(item => topic.match(item.course)).sort(() => Math.random() - 0.5);
       quizPos = 0;
     }
-    return QUIZ_BANK[quizOrder[quizPos++]];
+    if (quizPos >= quizPool.length) {
+      quizPool = quizPool.sort(() => Math.random() - 0.5);
+      quizPos = 0;
+    }
+    return quizPool[quizPos++];
   }
 
   function launchQuizQuestion() {
@@ -2101,7 +2190,7 @@
     const item = getNextQuizItem();
 
     setNanoAnim('wave');
-    setMascotState('idle', `🎯 تحدّي نانو — سؤال في مادة ${item.course}!`);
+    setMascotState('idle', `🎯 تحدّي نانو — سؤال في ${item.course}!`);
 
     const row = document.createElement('div');
     row.className = 'msg-row bot';
@@ -2116,7 +2205,10 @@
           <div class="quiz-q">${item.q}</div>
           <div class="quiz-opts"></div>
           <div class="quiz-feedback"></div>
-          <button type="button" class="quiz-next-btn">السؤال التالي ➡️</button>
+          <div class="quiz-actions-row">
+            <button type="button" class="quiz-next-btn">السؤال التالي ➡️</button>
+            <button type="button" class="quiz-next-btn quiz-change-btn" style="background:rgba(255,255,255,0.1); border:1px solid var(--border);">🔄 تغيير المادة</button>
+          </div>
         </div>
       </div>
     `;
@@ -2124,6 +2216,7 @@
     const optsWrap = row.querySelector('.quiz-opts');
     const fb = row.querySelector('.quiz-feedback');
     const nextBtn = row.querySelector('.quiz-next-btn');
+    const changeBtn = row.querySelector('.quiz-change-btn');
 
     item.opts.forEach((optText, idx) => {
       const btn = document.createElement('button');
@@ -2150,6 +2243,7 @@
           setNanoAnim('fly');
         }
         nextBtn.style.display = 'inline-block';
+        changeBtn.style.display = 'inline-block';
         chatStream.scrollTop = chatStream.scrollHeight;
       });
       optsWrap.appendChild(btn);
@@ -2159,12 +2253,15 @@
       nextBtn.disabled = true;
       launchQuizQuestion();
     });
+    changeBtn.addEventListener('click', () => {
+      showQuizTopicPicker();
+    });
 
     chatStream.appendChild(row);
     chatStream.scrollTop = chatStream.scrollHeight;
   }
 
-  document.getElementById('startQuizBtn')?.addEventListener('click', launchQuizQuestion);
+  document.getElementById('startQuizBtn')?.addEventListener('click', showQuizTopicPicker);
 
   // زر إظهار وإخفاء الـ QR Code
   const qrModal = document.getElementById('qrModal');
