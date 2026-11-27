@@ -413,6 +413,146 @@
       margin-top: 8px;
     }
 
+    /* ====== شريط سجل المحادثات الجانبي (على اليسار مثل Gemini / ChatGPT) ====== */
+    .workspace-shell {
+      position: relative;
+      z-index: 2;
+      flex: 1;
+      display: flex;
+      min-height: 0;
+      width: 100%;
+    }
+
+    .history-sidebar {
+      width: 270px;
+      flex-shrink: 0;
+      background: rgba(10, 18, 34, 0.92);
+      backdrop-filter: blur(18px);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 14px 12px;
+      gap: 10px;
+      transition: transform 0.28s ease, width 0.28s ease, padding 0.28s ease, opacity 0.25s ease;
+      order: 2; /* في RTL، order: 2 يضع الشريط على اليسار تماماً */
+    }
+    .history-sidebar.collapsed {
+      width: 0;
+      padding: 14px 0;
+      opacity: 0;
+      overflow: hidden;
+      border-right: none;
+    }
+
+    .new-chat-btn {
+      font-family: inherit;
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.18), rgba(129, 140, 248, 0.2));
+      color: #fff;
+      font-size: 0.86rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: 0.2s;
+    }
+    .new-chat-btn:hover { background: rgba(56, 189, 248, 0.3); }
+
+    .sidebar-label {
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: var(--muted);
+      padding: 2px 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .history-list {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      scrollbar-width: none;
+    }
+    .history-list::-webkit-scrollbar { display: none; }
+
+    .history-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      padding: 9px 10px;
+      border-radius: 11px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid transparent;
+      color: #cbd5e1;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: 0.18s;
+    }
+    .history-item:hover { background: rgba(255, 255, 255, 0.07); color: #fff; }
+    .history-item.active {
+      background: rgba(56, 189, 248, 0.14);
+      border-color: rgba(56, 189, 248, 0.4);
+      color: #fff;
+      font-weight: 700;
+    }
+    .history-title {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .del-chat-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.8rem;
+      padding: 2px 4px;
+      border-radius: 6px;
+      opacity: 0.65;
+    }
+    .del-chat-btn:hover { opacity: 1; color: #f87171; background: rgba(239, 68, 68, 0.15); }
+
+    .sidebar-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(4, 8, 18, 0.6);
+      z-index: 35;
+    }
+    .sidebar-backdrop.open { display: block; }
+
+    @media (max-width: 900px) {
+      .history-sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        z-index: 45;
+        width: 270px;
+        transform: translateX(-100%);
+        opacity: 1 !important;
+        padding: 16px 12px !important;
+        border-right: 1px solid var(--border) !important;
+      }
+      .history-sidebar:not(.collapsed) {
+        transform: translateX(0);
+      }
+      .history-sidebar.collapsed {
+        width: 270px;
+        transform: translateX(-100%);
+      }
+    }
+
     /* Modals (Team & n8n Config) */
     .modal-bg {
       position: fixed; inset: 0;
@@ -595,9 +735,13 @@
     <button class="pill-btn" id="toggleVoiceBtn" title="تشغيل/كتم صوت نانو">🔇<span class="btn-label"> الصوت: مكتوم</span></button>
     <button class="pill-btn" id="openTeamBtn" title="فريق العمل">👥<span class="btn-label"> فريق العمل</span></button>
     <button class="pill-btn" id="openConfigBtn" title="ربط n8n">⚙️<span class="btn-label"> ربط n8n</span></button>
+    <button class="pill-btn" id="toggleSidebarBtn" title="سجل المحادثات">☰<span class="btn-label"> السجل</span></button>
   </div>
 </header>
 
+<div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+<div class="workspace-shell">
 <!-- مساحة الشات الرئيسية بأسلوب Gemini + الروبوت الطائر -->
 <main class="app-container">
 
@@ -618,13 +762,16 @@
   <!-- رسائل المحادثة -->
   <div class="chat-stream" id="chatStream"></div>
 
-  <!-- أزرار سريعة -->
+  <!-- أزرار سريعة لنانو + اختصارات جميع المواد السبع -->
   <div class="suggestions" id="suggestions">
-    <button class="chip" data-q="مين إنت يا نانو وشو فكرتك؟">✨ مين إنت يا نانو؟</button>
-    <button class="chip" data-q="شو يعني ذكاء اصطناعي محلي وحفظ الخصوصية؟">🔒 ذكاء محلي وخصوصية</button>
-    <button class="chip" data-q="اشرح لي المعادلة المحاسبية من مادة محاسبة 1">📊 محاسبة 1 (المعادلة المحاسبية)</button>
-    <button class="chip" data-q="ما الفرق بين الاقتصاد الجزئي والاقتصاد الكلي؟">📈 اقتصاد جزئي وكلّي</button>
-    <button class="chip" data-q="شو أهم وظائف الإدارة من مادة إدارة 1؟">💼 إدارة 1 (وظائف الإدارة)</button>
+    <button class="chip" data-q="مين إنت يا نانو وشو فكرتك؟">✨ مين نانو؟</button>
+    <button class="chip" data-q="لخّص لي أهم مفاهيم مادة إدارة 1">💼 إدارة 1</button>
+    <button class="chip" data-q="لخّص لي أهم مفاهيم مادة إدارة 2">📋 إدارة 2</button>
+    <button class="chip" data-q="لخّص لي أهم مفاهيم مادة اقتصاد جزئي">📉 اقتصاد جزئي</button>
+    <button class="chip" data-q="لخّص لي أهم مفاهيم مادة اقتصاد كلّي">📈 اقتصاد كلّي</button>
+    <button class="chip" data-q="لخّص لي أهم مفاهيم مادة مبادئ مالية">💰 مبادئ مالية</button>
+    <button class="chip" data-q="لخّص لي أهم مفاهيم مادة محاسبة 1">📊 محاسبة 1</button>
+    <button class="chip" data-q="لخّص لي أهم مفاهيم مادة محاسبة 2">🧾 محاسبة 2</button>
   </div>
 
   <!-- شريط الإدخال السفلي بأسلوب Gemini + زر المايك للفعالية -->
@@ -637,6 +784,16 @@
     <div class="disclaimer" id="connectionNote">Agentic Mind • نانو: نموذج أولي تفاعلي للذكاء الاصطناعي المحلي الطائر (IT & Business)</div>
   </div>
 </main>
+
+<!-- الشريط الجانبي لسجل المحادثات المحفوظة (على اليسار) -->
+<aside class="history-sidebar" id="historySidebar" aria-label="سجل المحادثات">
+  <button type="button" class="new-chat-btn" id="newChatBtn">➕ محادثة جديدة</button>
+  <div class="sidebar-label">
+    <span>🕒 المحادثات المحفوظة (محلياً)</span>
+  </div>
+  <div class="history-list" id="historyList"></div>
+</aside>
+</div>
 
 <!-- نافذة فريق العمل -->
 <div class="modal-bg" id="teamModal">
@@ -695,7 +852,153 @@
   // ====== رابط n8n Cloud المربوط تلقائياً ======
   const DEFAULT_N8N_URL = 'https://ol9o9y.app.n8n.cloud/webhook/6c63f19d-7218-4d96-b0fc-305f107bcc79/chat';
   let n8nUrl = localStorage.getItem('agentic_n8n_url_v2') || DEFAULT_N8N_URL;
-  const sessionId = 'am-' + Math.random().toString(36).slice(2, 10);
+  let sessionId = 'am-' + Math.random().toString(36).slice(2, 10);
+
+  // ====== نظام حفظ سجل المحادثات محلياً (Local Chat History Sidebar) ======
+  const HISTORY_KEY = 'nano_chat_history_v1';
+  let savedChats = [];
+  let activeChatId = null;
+
+  try {
+    savedChats = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+    if (!Array.isArray(savedChats)) savedChats = [];
+  } catch { savedChats = []; }
+
+  const historySidebar = document.getElementById('historySidebar');
+  const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+  const historyList = document.getElementById('historyList');
+  const toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
+  const newChatBtn = document.getElementById('newChatBtn');
+
+  // على التلفون يبدأ الشريط مغلقاً تلقائياً عشان يضل الشات واسع
+  if (window.innerWidth <= 900) {
+    historySidebar?.classList.add('collapsed');
+  }
+
+  function closeMobileSidebar() {
+    if (window.innerWidth <= 900) {
+      historySidebar?.classList.add('collapsed');
+      sidebarBackdrop?.classList.remove('open');
+    }
+  }
+
+  toggleSidebarBtn?.addEventListener('click', () => {
+    const isCollapsed = historySidebar.classList.toggle('collapsed');
+    if (window.innerWidth <= 900) {
+      sidebarBackdrop.classList.toggle('open', !isCollapsed);
+    }
+  });
+  sidebarBackdrop?.addEventListener('click', closeMobileSidebar);
+
+  function persistChats() {
+    try {
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(savedChats.slice(0, 30)));
+    } catch {}
+  }
+
+  function ensureActiveChat(firstTitle) {
+    if (activeChatId) {
+      const existing = savedChats.find(c => c.id === activeChatId);
+      if (existing) return existing;
+    }
+    const chat = {
+      id: sessionId,
+      title: (firstTitle || 'محادثة جديدة').slice(0, 38),
+      updatedAt: Date.now(),
+      messages: []
+    };
+    savedChats.unshift(chat);
+    activeChatId = chat.id;
+    persistChats();
+    renderHistoryList();
+    return chat;
+  }
+
+  function saveMessageToHistory(role, text, sources = []) {
+    const chat = ensureActiveChat(role === 'user' ? text : 'محادثة مع نانو');
+    chat.messages.push({
+      role,
+      text,
+      sources: (sources || []).map(s => ({ c: s.c }))
+    });
+    chat.updatedAt = Date.now();
+    // نقل المحادثة النشطة لأعلى القائمة
+    savedChats = [chat, ...savedChats.filter(c => c.id !== chat.id)];
+    persistChats();
+    renderHistoryList();
+  }
+
+  function renderHistoryList() {
+    if (!historyList) return;
+    if (!savedChats.length) {
+      historyList.innerHTML = '<div style="font-size:0.78rem; color:var(--muted); text-align:center; padding:16px 8px;">لا توجد محادثات محفوظة بعد.<br>ابدأ الحديث مع نانو وسيتم الحفظ تلقائياً!</div>';
+      return;
+    }
+    historyList.innerHTML = '';
+    savedChats.forEach(chat => {
+      const item = document.createElement('div');
+      item.className = 'history-item' + (chat.id === activeChatId ? ' active' : '');
+      item.innerHTML = `<span class="history-title">💬 </span><button type="button" class="del-chat-btn" title="حذف">🗑️</button>`;
+      item.querySelector('.history-title').append(document.createTextNode(chat.title));
+      item.addEventListener('click', (e) => {
+        if (e.target.closest('.del-chat-btn')) return;
+        loadChatById(chat.id);
+        closeMobileSidebar();
+      });
+      item.querySelector('.del-chat-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        savedChats = savedChats.filter(c => c.id !== chat.id);
+        persistChats();
+        if (activeChatId === chat.id) startNewChat();
+        else renderHistoryList();
+      });
+      historyList.appendChild(item);
+    });
+  }
+
+  function startNewChat() {
+    activeChatId = null;
+    sessionId = 'am-' + Math.random().toString(36).slice(2, 10);
+    chatStream.innerHTML = '';
+    welcomeHero.classList.remove('compact');
+    appContainer?.classList.remove('chat-active');
+    renderHistoryList();
+    closeMobileSidebar();
+  }
+
+  function loadChatById(id) {
+    const chat = savedChats.find(c => c.id === id);
+    if (!chat) return;
+    activeChatId = chat.id;
+    sessionId = chat.id;
+    chatStream.innerHTML = '';
+    welcomeHero.classList.add('compact');
+    appContainer?.classList.add('chat-active');
+    chat.messages.forEach(m => {
+      const row = document.createElement('div');
+      row.className = `msg-row ${m.role}`;
+      if (m.role === 'user') {
+        row.innerHTML = `<div class="bubble"></div>`;
+        row.querySelector('.bubble').textContent = m.text;
+      } else {
+        row.innerHTML = `<div class="msg-avatar"><img src="logo.png" alt="AI" /></div><div class="bubble"><div class="bubble-text"></div></div>`;
+        row.querySelector('.bubble-text').textContent = m.text;
+        if (m.sources && m.sources.length) {
+          const uniqueCourses = [...new Set(m.sources.map(s => s.c))];
+          const badgeWrap = document.createElement('div');
+          badgeWrap.className = 'source-badges';
+          badgeWrap.innerHTML = uniqueCourses.map(c => `<span class="source-pill">📚 ${c}</span>`).join('');
+          row.querySelector('.bubble').appendChild(badgeWrap);
+        }
+      }
+      chatStream.appendChild(row);
+    });
+    chatStream.scrollTop = chatStream.scrollHeight;
+    renderHistoryList();
+  }
+
+  newChatBtn?.addEventListener('click', startNewChat);
+  renderHistoryList();
 
   const mascot = document.getElementById('mascot');
   const mascotStatus = document.getElementById('mascotStatus');
@@ -1443,6 +1746,7 @@
   function addUserBubble(text) {
     welcomeHero.classList.add('compact');
     appContainer?.classList.add('chat-active');
+    saveMessageToHistory('user', text);
     const row = document.createElement('div');
     row.className = 'msg-row user';
     row.innerHTML = `<div class="bubble"></div>`;
@@ -1455,6 +1759,7 @@
   function streamBotReply(fullText, sources = []) {
     welcomeHero.classList.add('compact');
     appContainer?.classList.add('chat-active');
+    saveMessageToHistory('bot', fullText, sources);
     setMascotState('talking', '🗣️ نانو يتحدث معك الآن...');
     playCuteChime();
     speakText(fullText);
