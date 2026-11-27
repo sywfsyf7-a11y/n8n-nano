@@ -24,7 +24,7 @@
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; }
+    html, body { height: 100%; height: 100dvh; }
 
     body {
       font-family: 'Cairo', system-ui, -apple-system, sans-serif;
@@ -32,7 +32,7 @@
       color: var(--text);
       display: flex;
       flex-direction: column;
-      overflow-x: hidden;
+      overflow: hidden;
     }
 
     /* Animated subtle starfield */
@@ -130,11 +130,15 @@
       position: relative;
       width: 100%;
       max-width: 640px;
-      height: 235px;
+      height: 220px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
+      transition: height 0.35s ease;
+    }
+    .app-container.chat-active .mascot-arena {
+      height: 155px;
     }
 
     #nano3d {
@@ -269,6 +273,24 @@
       background: rgba(21, 36, 63, 0.72);
       border: 1px solid var(--border);
       border-top-right-radius: 6px;
+    }
+
+    .source-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .source-pill {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 9px;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.14);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: #7dd3fc;
     }
 
     .msg-row.user .bubble {
@@ -451,6 +473,111 @@
       font-family: monospace;
       margin: 10px 0 16px;
     }
+
+    /* ====== تحسين كامل وشامل للهواتف (Mobile Responsive) ====== */
+    @media (max-width: 680px) {
+      header {
+        padding: 8px 12px;
+      }
+      .brand {
+        gap: 8px;
+        font-size: 0.9rem;
+      }
+      .brand img {
+        width: 30px;
+        height: 30px;
+      }
+      .brand-tag {
+        display: none;
+      }
+      .header-btns {
+        gap: 6px;
+      }
+      .pill-btn {
+        padding: 6px 10px;
+        font-size: 0.75rem;
+      }
+      .pill-btn .btn-label {
+        display: none;
+      }
+      .app-container {
+        padding: 6px 10px 10px;
+      }
+      .mascot-stage {
+        padding: 0 0 4px;
+      }
+      .mascot-arena {
+        height: 145px;
+      }
+      .app-container.chat-active .mascot-arena {
+        height: 98px;
+      }
+      .mascot-status-pill {
+        margin-top: 2px;
+        font-size: 0.7rem;
+        padding: 2px 10px;
+      }
+      .welcome-hero {
+        margin: 4px 0 10px;
+      }
+      .welcome-hero h1 {
+        font-size: 1.25rem;
+      }
+      .welcome-hero p {
+        font-size: 0.8rem;
+      }
+      .chat-stream {
+        padding: 6px 2px 10px;
+        gap: 12px;
+      }
+      .msg-row {
+        gap: 8px;
+      }
+      .msg-avatar {
+        width: 28px;
+        height: 28px;
+      }
+      .bubble {
+        max-width: 90%;
+        padding: 10px 13px;
+        font-size: 0.92rem;
+        line-height: 1.65;
+        border-radius: 16px;
+      }
+      .suggestions {
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        overflow-x: auto;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 4px;
+        margin-bottom: 8px;
+      }
+      .suggestions::-webkit-scrollbar {
+        display: none;
+      }
+      .chip {
+        flex-shrink: 0;
+        padding: 6px 12px;
+        font-size: 0.76rem;
+      }
+      .input-pill {
+        padding: 6px 8px 6px 12px;
+        gap: 6px;
+      }
+      .input-pill input {
+        font-size: 16px; /* يمنع تكبير الشاشة التلقائي في الآيفون والأندرويد */
+        padding: 4px 4px;
+      }
+      .mic-circle, .send-circle {
+        width: 38px;
+        height: 38px;
+        font-size: 0.98rem;
+      }
+      .disclaimer {
+        display: none;
+      }
+    }
   </style>
 </head>
 <body>
@@ -465,9 +592,9 @@
     <span class="brand-tag">AI Live</span>
   </div>
   <div class="header-btns">
-    <button class="pill-btn" id="toggleVoiceBtn" title="تشغيل/كتم صوت نانو">🔇 الصوت: مكتوم</button>
-    <button class="pill-btn" id="openTeamBtn">👥 فريق العمل</button>
-    <button class="pill-btn" id="openConfigBtn">⚙️ ربط n8n</button>
+    <button class="pill-btn" id="toggleVoiceBtn" title="تشغيل/كتم صوت نانو">🔇<span class="btn-label"> الصوت: مكتوم</span></button>
+    <button class="pill-btn" id="openTeamBtn" title="فريق العمل">👥<span class="btn-label"> فريق العمل</span></button>
+    <button class="pill-btn" id="openConfigBtn" title="ربط n8n">⚙️<span class="btn-label"> ربط n8n</span></button>
   </div>
 </header>
 
@@ -495,8 +622,9 @@
   <div class="suggestions" id="suggestions">
     <button class="chip" data-q="مين إنت يا نانو وشو فكرتك؟">✨ مين إنت يا نانو؟</button>
     <button class="chip" data-q="شو يعني ذكاء اصطناعي محلي وحفظ الخصوصية؟">🔒 ذكاء محلي وخصوصية</button>
-    <button class="chip" data-q="كيف بتتعلّم مني وبربّيك على إيدي؟">🧠 كيف بتتعلّم مني؟</button>
-    <button class="chip" data-q="شو الرؤية المستقبلية لمشروع نانو للشركات والدول؟">🚀 الرؤية المستقبلية (Business & IT)</button>
+    <button class="chip" data-q="اشرح لي المعادلة المحاسبية من مادة محاسبة 1">📊 محاسبة 1 (المعادلة المحاسبية)</button>
+    <button class="chip" data-q="ما الفرق بين الاقتصاد الجزئي والاقتصاد الكلي؟">📈 اقتصاد جزئي وكلّي</button>
+    <button class="chip" data-q="شو أهم وظائف الإدارة من مادة إدارة 1؟">💼 إدارة 1 (وظائف الإدارة)</button>
   </div>
 
   <!-- شريط الإدخال السفلي بأسلوب Gemini + زر المايك للفعالية -->
@@ -519,28 +647,28 @@
     </div>
     <div class="team-grid">
       <div class="member-card">
+        <div class="member-avatar">ج</div>
+        <h4>جهاد أبو الرب</h4>
+        <span>المؤسس • Founder</span>
+        <p>مؤسس مبادرة وفريق Agentic Mind.</p>
+      </div>
+      <div class="member-card">
+        <div class="member-avatar">أ</div>
+        <h4>أبرار نصر</h4>
+        <span>ليدر الهاشمية • HU Leader</span>
+        <p>قيادة وتنسيق فريق Agentic Mind في الجامعة الهاشمية.</p>
+      </div>
+      <div class="member-card">
         <div class="member-avatar">س</div>
         <h4>سيف</h4>
-        <span>AI & Automation • IT</span>
-        <p>بناء وكلاء الذكاء الاصطناعي والربط مع n8n Cloud.</p>
+        <span>AI & Automation • مطوّر نانو</span>
+        <p>تطوير شخصية نانو الذكية وبناء منظومة الأتمتة وقاعدة المعرفة.</p>
       </div>
       <div class="member-card">
-        <div class="member-avatar">ع</div>
-        <h4>عضو الفريق 2</h4>
-        <span>Business Strategy • Business</span>
-        <p>نموذج العمل، التسعير، وتجربة العملاء.</p>
-      </div>
-      <div class="member-card">
-        <div class="member-avatar">م</div>
-        <h4>عضو الفريق 3</h4>
-        <span>Systems & Web • IT</span>
-        <p>تطوير الواجهة التفاعلية والربط السحابي.</p>
-      </div>
-      <div class="member-card">
-        <div class="member-avatar">ر</div>
-        <h4>عضو الفريق 4</h4>
-        <span>Operations & Pitch • Business</span>
-        <p>إدارة العمليات، الهوية البصرية، والعرض التقديمي.</p>
+        <div class="member-avatar">ف</div>
+        <h4>فرح عماد</h4>
+        <span>عضو فريق Agentic Mind</span>
+        <p>المساهمة في تنظيم وإنجاح مشروع وفعالية Agentic Mind.</p>
       </div>
     </div>
   </div>
@@ -1009,14 +1137,18 @@
     }
     animate();
 
-    window.addEventListener('resize', () => {
+    function sync3DSize() {
       const w = canvas3d.clientWidth;
       const h = canvas3d.clientHeight;
       if (!w || !h) return;
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h, false);
-    });
+    }
+    window.addEventListener('resize', sync3DSize);
+    if (window.ResizeObserver) {
+      new ResizeObserver(sync3DSize).observe(canvas3d);
+    }
   })();
 
   function setNanoAnim(mode) {
@@ -1067,22 +1199,179 @@
     }
   });
 
+  // ====== محرك الصوت العربي المحسّن (Natural Neural Voice Selector) ======
   let voiceEnabled = false;
+  let availableVoices = [];
   const toggleVoiceBtn = document.getElementById('toggleVoiceBtn');
+
+  function loadVoices() {
+    if (!('speechSynthesis' in window)) return;
+    availableVoices = window.speechSynthesis.getVoices() || [];
+  }
+  if ('speechSynthesis' in window) {
+    loadVoices();
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+  }
+
+  function pickBestVoice(isArabic) {
+    if (!availableVoices.length) loadVoices();
+    if (isArabic) {
+      const preferred = [
+        v => /natural/i.test(v.name) && /ar/i.test(v.lang) && /salma|hamed|shakir|zariyah|laith|taha/i.test(v.name),
+        v => /natural|online|neural/i.test(v.name) && /ar/i.test(v.lang),
+        v => /google/i.test(v.name) && /ar/i.test(v.lang),
+        v => /maged|laila|tarik|hoda|naayf/i.test(v.name),
+        v => /^ar/i.test(v.lang)
+      ];
+      for (const match of preferred) {
+        const found = availableVoices.find(match);
+        if (found) return found;
+      }
+    } else {
+      const preferredEn = [
+        v => /natural|online|neural/i.test(v.name) && /^en/i.test(v.lang),
+        v => /google us english/i.test(v.name),
+        v => /^en-US/i.test(v.lang)
+      ];
+      for (const match of preferredEn) {
+        const found = availableVoices.find(match);
+        if (found) return found;
+      }
+    }
+    return null;
+  }
+
+  // نغمة روبوت كيوت لطيفة (Web Audio API)
+  function playCuteChime() {
+    if (!voiceEnabled) return;
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      const ctx = new AC();
+      const now = ctx.currentTime;
+      [660, 880].forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now + i * 0.07);
+        gain.gain.setValueAtTime(0.06, now + i * 0.07);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.07 + 0.14);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now + i * 0.07);
+        osc.stop(now + i * 0.07 + 0.15);
+      });
+    } catch {}
+  }
+
   toggleVoiceBtn.addEventListener('click', () => {
     voiceEnabled = !voiceEnabled;
-    toggleVoiceBtn.textContent = voiceEnabled ? '🔊 الصوت: شغّال' : '🔇 الصوت: مكتوم';
-    if (!voiceEnabled && 'speechSynthesis' in window) window.speechSynthesis.cancel();
+    toggleVoiceBtn.innerHTML = voiceEnabled
+      ? '🔊<span class="btn-label"> الصوت: شغّال</span>'
+      : '🔇<span class="btn-label"> الصوت: مكتوم</span>';
+    if (!voiceEnabled && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    } else if (voiceEnabled) {
+      playCuteChime();
+      speakText('أهلاً بك! أنا نانو، جاهز أتحدث معك بصوت لطيف وكيوت!');
+    }
   });
 
   function speakText(text) {
     if (!voiceEnabled || !('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
-    const clean = text.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, '');
-    const utter = new SpeechSynthesisUtterance(clean);
-    utter.lang = /[\u0600-\u06FF]/.test(clean) ? 'ar-SA' : 'en-US';
-    utter.rate = 1.05;
-    window.speechSynthesis.speak(utter);
+
+    // تنظيف النص من الإيموجي ورموز الماركداون عشان ما ينطقها بشكل مزعج
+    const clean = text
+      .replace(/https?:\/\/\S+/g, '')
+      .replace(/[*#_`~•▪►➤]/g, ' ')
+      .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    if (!clean) return;
+
+    const isArabic = /[\u0600-\u06FF]/.test(clean);
+    const chosenVoice = pickBestVoice(isArabic);
+
+    // تقسيم النص لجمل قصيرة + نبرة AI كيوت وحيوية!
+    const sentences = clean.match(/[^.!؟?\n]+[.!؟?\n]*/g) || [clean];
+    sentences.forEach((chunk, idx) => {
+      const part = chunk.trim();
+      if (!part) return;
+      const utter = new SpeechSynthesisUtterance(part);
+      if (chosenVoice) utter.voice = chosenVoice;
+      utter.lang = chosenVoice ? chosenVoice.lang : (isArabic ? 'ar-JO' : 'en-US');
+      utter.rate = isArabic ? 1.06 : 1.08;
+      utter.pitch = 1.28; // نبرة روبوت AI لطيفة وكيوت!
+      if (idx === 0) {
+        utter.onstart = () => setMascotState('talking', '🗣️ نانو يتحدث معك الآن...');
+      }
+      if (idx === sentences.length - 1) {
+        utter.onend = () => setMascotState('idle', ANIM_LABELS[currentAnimMode] || '✨ جاهز لطلبك التالي');
+      }
+      window.speechSynthesis.speak(utter);
+    });
+  }
+
+  // ====== محرك البحث الذكي (RAG) في ملفات مواد الجامعة (courses_kb.json) ======
+  let coursesKB = null;
+  const connectionNote = document.getElementById('connectionNote');
+
+  function normalizeAr(str) {
+    return (str || '')
+      .toLowerCase()
+      .replace(/[\u064B-\u065F\u0670]/g, '')
+      .replace(/[أإآ]/g, 'ا')
+      .replace(/ة/g, 'ه')
+      .replace(/ى/g, 'ي')
+      .replace(/[^\u0621-\u064Aa-z0-9\s]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  const STOP_WORDS = new Set([
+    'من','في','على','الى','عن','مع','هو','هي','هم','ان','ما','هل','كيف','شو','ايش','ليش','عشان','هذا','هذه','التي','الذي','بين','او','و','لا','نعم','لي','لك','لنا','اشرح','عرف','ماهو','ماهي','the','is','are','of','to','in','and','for','what','how','explain'
+  ]);
+
+  fetch('courses_kb.json')
+    .then(r => r.ok ? r.json() : null)
+    .then(data => {
+      if (data && Array.isArray(data.chunks)) {
+        coursesKB = data.chunks.map(item => ({
+          c: item.c,
+          f: item.f,
+          t: item.t,
+          norm: normalizeAr(item.c + ' ' + item.f + ' ' + item.t)
+        }));
+        if (connectionNote) {
+          connectionNote.textContent = `Agentic Mind • نانو مزوّد بقاعدة معرفة جامعية (${coursesKB.length.toLocaleString()} فقرة من 7 مواد أعمال)`;
+        }
+      }
+    })
+    .catch(() => {});
+
+  function searchCourseKB(query, topK = 3) {
+    if (!coursesKB || !coursesKB.length) return [];
+    const normQ = normalizeAr(query);
+    const tokens = normQ.split(' ').filter(w => w.length >= 2 && !STOP_WORDS.has(w));
+    if (!tokens.length) return [];
+
+    const scored = [];
+    for (let i = 0; i < coursesKB.length; i++) {
+      const item = coursesKB[i];
+      let score = 0;
+      for (const tok of tokens) {
+        if (item.norm.includes(tok)) {
+          score += tok.length >= 4 ? 3 : 1.5;
+          if (normalizeAr(item.c).includes(tok)) score += 4;
+        }
+      }
+      if (score >= 4.5) {
+        scored.push({ score, item });
+      }
+    }
+    scored.sort((a, b) => b.score - a.score);
+    return scored.slice(0, topK).map(s => s.item);
   }
 
   // زر المايك (افتح للتحدث، وأغلقه فوراً في الأماكن المزدحمة)
@@ -1149,8 +1438,11 @@
     streamBotReply('أهلاً بك! 👋 أنا نانو 3D، ذكاء اصطناعي محلي طائر من مشروع Agentic Mind ✨\nبياناتك بتضل عندك وما بتروح لأي شركة، وبتتعلّم مني وبربّيني على إيديك — اكتبلي أو اضغط 🎤 واحكي معي!');
   });
 
+  const appContainer = document.querySelector('.app-container');
+
   function addUserBubble(text) {
     welcomeHero.classList.add('compact');
+    appContainer?.classList.add('chat-active');
     const row = document.createElement('div');
     row.className = 'msg-row user';
     row.innerHTML = `<div class="bubble"></div>`;
@@ -1159,30 +1451,43 @@
     chatStream.scrollTop = chatStream.scrollHeight;
   }
 
-  // كتابة الرد تدريجياً مثل Gemini مع تحريك فم الروبوت!
-  function streamBotReply(fullText) {
+  // كتابة الرد تدريجياً مثل Gemini مع تحريك فم الروبوت وعرض مصادر المواد!
+  function streamBotReply(fullText, sources = []) {
     welcomeHero.classList.add('compact');
+    appContainer?.classList.add('chat-active');
     setMascotState('talking', '🗣️ نانو يتحدث معك الآن...');
+    playCuteChime();
     speakText(fullText);
 
     const row = document.createElement('div');
     row.className = 'msg-row bot';
     row.innerHTML = `
       <div class="msg-avatar"><img src="logo.png" alt="AI" /></div>
-      <div class="bubble"></div>
+      <div class="bubble"><div class="bubble-text"></div></div>
     `;
     const bubble = row.querySelector('.bubble');
+    const bubbleText = row.querySelector('.bubble-text');
     chatStream.appendChild(row);
 
     let i = 0;
     const speed = 12; // سرعة الكتابة بالمللي ثانية
     const timer = setInterval(() => {
-      bubble.textContent += fullText[i];
+      bubbleText.textContent += fullText[i];
       i++;
       chatStream.scrollTop = chatStream.scrollHeight;
       if (i >= fullText.length) {
         clearInterval(timer);
-        setMascotState('idle', '✨ جاهز لطلبك التالي');
+        if (sources && sources.length) {
+          const uniqueCourses = [...new Set(sources.map(s => s.c))];
+          const badgeWrap = document.createElement('div');
+          badgeWrap.className = 'source-badges';
+          badgeWrap.innerHTML = uniqueCourses.map(c => `<span class="source-pill">📚 ${c}</span>`).join('');
+          bubble.appendChild(badgeWrap);
+          chatStream.scrollTop = chatStream.scrollHeight;
+        }
+        if (!voiceEnabled || !('speechSynthesis' in window) || !window.speechSynthesis.speaking) {
+          setMascotState('idle', '✨ جاهز لطلبك التالي');
+        }
       }
     }, speed);
   }
@@ -1227,42 +1532,51 @@
     addUserBubble(text);
     chatInput.value = '';
 
-    // إذا ضغط المستخدم على أحد الأزرار الأربعة -> رد فوري محفوظ خلال جزء من الثانية!
+    // إذا ضغط المستخدم على زر هوية نانو الفوري -> رد فوري محفوظ!
     if (useInstant && INSTANT_ANSWERS[text]) {
       setMascotState('thinking', '⚡ لحظة...');
       setTimeout(() => streamBotReply(INSTANT_ANSWERS[text]), 220);
       return;
     }
 
-    setMascotState('thinking', '⚡ نانو يفكّر...');
+    // البحث الذكي (RAG) في ملفات مواد الجامعة (إدارة، اقتصاد، مالية، محاسبة)
+    const matchedChunks = searchCourseKB(text, 3);
+    let enrichedInput = text;
+    if (matchedChunks.length > 0) {
+      setMascotState('thinking', `📚 نانو يراجع مادة ${matchedChunks[0].c}...`);
+      const contextText = matchedChunks
+        .map((ch, idx) => `(${idx + 1}) [المادة: ${ch.c} | الملف: ${ch.f}]: ${ch.t}`)
+        .join('\n');
+      enrichedInput = `${text}\n\n[معلومات مرجعية مستخرجة من ملفات PDF مواد الجامعة — اعتمد عليها في إجابتك واذكر اسم المادة:]\n${contextText}`;
+    } else {
+      setMascotState('thinking', '⚡ نانو يفكّر...');
+    }
 
     if (n8nUrl) {
       try {
         const res = await fetch(n8nUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'sendMessage', sessionId, chatInput: text })
+          body: JSON.stringify({ action: 'sendMessage', sessionId, chatInput: enrichedInput })
         });
         const rawText = await res.text();
         if (!res.ok) {
-          // درع أمان صامت: لا تظهر أي رسالة خطأ قدام الجمهور!
-          streamBotReply(getSmartLocalFallback(text));
+          streamBotReply(`⚠️ خادم n8n رجّع خطأ (${res.status}): ${rawText.slice(0, 160)}`);
           return;
         }
         let data;
         try { data = JSON.parse(rawText); } catch { data = { output: rawText }; }
         const reply = data.output || data.text || data.message || (Array.isArray(data) && data[0]?.output) || rawText;
-        streamBotReply(reply || getSmartLocalFallback(text));
+        streamBotReply(reply, matchedChunks);
       } catch (err) {
-        // درع أمان صامت في حال ضعف الإنترنت بالفعالية
-        streamBotReply(getSmartLocalFallback(text));
+        streamBotReply('⚠️ تعذّر الاتصال بخادم n8n — تأكد من رابط الـ Chat URL وتفعيل Publish.');
       }
       return;
     }
 
     // رد تفاعلي فوري في حال لم يتم ربط رابط n8n بعد
     setTimeout(() => {
-      streamBotReply(getSmartLocalFallback(text));
+      streamBotReply(getSmartLocalFallback(text), matchedChunks);
     }, 550);
   }
 
